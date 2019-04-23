@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="shortcut icon" href="img/favicon.ico">
+		<title>メニュー</title>
+		<meta name="viewport" content="width=device-width">
+		<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+		<style type="text/css">
+			.menu-body { margin: 0; }
+			.menu-ul {
+				margin: 0;
+				padding: 0;
+				list-style-type: none;
+			}
+			.menu-ul a {
+				display: block;
+				text-decoration: none;
+				color: #666;
+			}
+			.menu-ul a:hover,
+			.menu-ul a:active{ color: #e36; }
+			.toggle {
+				background-color: #eee;
+				padding: 10px;
+				text-align: right;
+			}
+			.inner { display: none; }
+			.inner li {
+				padding: 5px 16px;
+				border-bottom: 1px dotted #dddddd;
+			}
+		</style>
+		<script type="text/javascript">
+			$(function() {
+				$(".toggle").on("click", function() {
+					$(this).next().slideToggle(300);
+				});
+				$(".inner a").on("click", function() {
+					location.href="https://dl.dropboxusercontent.com/u/15532246/enable/" + $(this).data("url");
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<ul class="menu-body menu-ul">
+			<li>
+				<a href="javascript:void(0)" class="toggle">▼</a>
+				<ul class="inner menu-ul">
+					<li><a href="javascript:void(0)" data-url="time.html">汎用時刻計算</a></li>
+					<li><a href="javascript:void(0)" data-url="touken/keisan.html">計算乱舞</a></li>
+					<li><a href="javascript:void(0)" data-url="imas_sidem/keisan.html">計算ツールSideM</a></li>
+					<li><a href="javascript:void(0)" data-url="imas_cg/keisan.html">計算ツールCG</a></li>
+					<li><a href="javascript:void(0)" data-url="tool.html">◆トップ</a></li>
+				</ul>
+			</li>
+		</ul>
+	</body>
+</html>

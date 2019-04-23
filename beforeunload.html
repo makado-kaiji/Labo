@@ -1,0 +1,21 @@
+<!doctype html>
+ 
+<html>
+  <head>
+    <title>beforeunload</title>
+    <!-- エンコードをUFT8に固定 -->
+    <meta charset="utf-8" />
+    <!-- jQueryは常に最新の無圧縮をダウンロードして使う -->
+    <script src="https://code.jquery.com/jquery-3.0.0.js"></script>
+    <script>
+    	$(window).bind("beforeunload",function(){
+        return "遷移前だぞい";
+	});
+</script>
+  </head>
+    <body>
+        <p><a href="https://syncer.jp/js-minifier">圧縮する</a></p>
+        <p><a href="https://syncer.jp/js-prettyprint">復元する</a></p>
+    </body>
+</html>
+

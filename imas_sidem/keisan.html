@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript" src="../menu.js"></script>
+	<script type="text/javascript" src="keisan_sidem.js"></script>
+	<link rel="stylesheet" type="text/css" href="keisan_sidem.css">
+	<link rel="shortcut icon" href="../img/favicon.ico">
+	<title>計算ツールSideM</title>
+	<meta name="viewport" content="width=device-width">
+</head>
+<body>
+<h3>計算ツールSideM</h3>
+
+<h4>回復計算</h4>
+体力　　　：<input type="number" name="stamina_now" id="stamina_now" max="999" min="0">／<input type="number" name="stamina_max" id="stamina_max" max="999" min="0">　<input type="button" id="" value=" 変換 " onclick="change(0)">
+<div style="height: 10px;"></div>
+アピール力：<input type="number" name="appeal_now" id="appeal_now" max="999" min="0">／<input type="number" name="appeal_max" id="appeal_max" max="999" min="0" value="100" readonly>　<input type="button" value=" 変換 " onclick="change(1)">
+<div style="height: 10px;"></div>
+到達時刻　：<input type="number" name="limit_hour" id="limit_hour" max="24" min="0">：<input type="number" name="limit_min" id="limit_min" max="59" min="0">　<input type="button" value=" 変換 " onclick="change(2)">
+<div style="height: 10px;"></div>
+所要時間　：<input type="number" name="hour" id="hour" max="999" min="0">時間<input type="number" name="min" id="min" max="59" min="0">分　<input type="button" value=" 変換 " onclick="change(3)">
+<br>
+<span id="errMessage" style="color: red;">&nbsp;</span>
+
+<p>現在時刻　　：<span id="currentTime"></span></p>
+<p>回復予定時刻：<span id="estimatedTime"></span></p>
+<div style="height: 10px;"></div>
+
+<form name="timer">
+	<input type="number" name="timer_hour" id="timer_hour" max="999" min="0">時間
+	<input type="number" name="timer_min" id="timer_min" max="59" min="0">分
+	<input type="number" name="timer_min" id="timer_second" max="59" min="0">秒
+	<br>
+	<input type="button" value="スタート" onclick="cntStart()">
+	<input type="button" value="ストップ" onclick="cntStop()">
+	<input type="button" value="リセット" onclick="reSet()">
+</form>
+
+<hr style="border-color: #666;">
+
+<h4>MMM予想値計算</h4>
+<span style="font-size: small;">※チェンジ後のホシイモノ数値を入力してください</span><br>
+<input type="radio" id="q1" name="q1" value="0" checked="true"><label for="q1">R+</label>　<input type="radio" id="q2" name="q1" value="1"><label for="q2">SR+</label>　編成値<input type="number" name="cost" id="cost" max="99" min="0"><br>
+Vo<input type="number" name="vocal" id="vocal" max="9999" min="0">　Da<input type="number" name="dance" id="dance" max="9999" min="0">　Vi<input type="number" name="visual" id="visual" max="9999" min="0"><br>
+<input type="button" value=" 計算ツールSideM " onclick="MMMkeisan()">
+<div style="height: 10px;"></div>
+<div style="height: 10px;"></div>
+<span style="color:#00bbff; font-weight: bold;">Vo：</span><span id="MMM_Vo"></span>(コス比：<span id="Kosuhi_Vo">&nbsp;</span>)
+<br>
+<span style="color:#00bbff; font-weight: bold;">Da：</span><span id="MMM_Da"></span>(コス比：<span id="Kosuhi_Da">&nbsp;</span>)
+<br>
+<span style="color:#00bbff; font-weight: bold;">Vi：</span><span id="MMM_Vi"></span>(コス比：<span id="Kosuhi_Vi">&nbsp;</span>)
+<br>
+
+<hr style="border-color: #666;">
+
+<h4>レベルアップ計算</h4>
+経験値：<input type="number" name="keiken_now" id="keiken_now" max="9999999" min="0">／<input type="number" name="keiken_max" id="keiken_max" max="9999999" min="0">　<input type="button" id="" value=" 計算 " onclick="levelUp()">
+<div style="height: 10px;"></div>
+<p>経験値：<span id="dispKeiken"></span></p>
+<p>お仕事：<span id="dispJob"></span></p>
+<hr style="border-color: #666;">
+
+<h4>ブックマークレット</h4>
+<a href="javascript:pid=prompt('ページ番号を入力してください','');if(isFinite(pid)&&pid>0){location.href='http://g12017647.sp.pf.mbga.jp/?url=http%3A%2F%2Fm.i-sidem.idolmaster.jp%2Fmessage%2Fpresent%2F2%2F'+pid};">プレゼント「アイドル」ページジャンプ</a>
+<p>プレゼントの「アイドル」タブが100ページを超えるような人向け<br>
+ポップアップに希望するページ数を入力すると直接該当ページにジャンプします</p>
+<hr style="border-color: #666;">
+
+<p><b>概要</b></p>
+<p>ものぐさ向きのツールです
+<br>拡散・ご利用ご自由に</p>
+<p>作った人→<a href="https://twitter.com/mmtb_game" target="blank">@mmtb_game</a></p>
+<br>
+<p><b>各変換ボタンについて</b></p>
+<p>・体力
+<br>　「現在の体力／最大値」で入力して変換すると
+<br>　最大値に到達する時刻・所要時間を表示します</p>
+<p>・アピール力
+<br>　「現在のアピール力／最大値」で入力して変換すると
+<br>　最大値に到達する時刻・所要時間を表示します
+<br>　※現在は最大値を100で固定にしています</p>
+<p>・到達時刻
+<br>　到達時刻までに回復できる体力・アピール力を表示します
+<br>　所要時間は現在時刻からかかる時間を表示します</p>
+<p>・所要時間
+<br>　入力した時間で回復できる体力・アピール力を表示します
+<br>　到達時刻は現在時刻に加算した時刻を表示します</p>
+<br>
+<p><b>タイマー機能について</b></p>
+<p>各変換ボタンを押下した際、所要時間と同じ値がセットされます
+<br>微調整したい場合は入力し直してください</p>
+<p>・スタートボタン：カウントダウン開始
+<br>・ストップボタン：停止
+<br>・リセットボタン：リセット</p>
+<p>カウントダウンが終了するとポップアップが表示されます</p>
+<p>例：1時間30分15秒をセット
+<br>→カウントダウン終了後「1時間30分15秒経過しました！」と表示</p>
+<p>※ページを再読込するとタイマーがリセットされます</p>
+<br>
+<p><b>MMM予想値計算機能について</b></p>
+<p>参考： <a href="http://imas-cg.net/archives/40367065.html" target="blank">http://imas-cg.net/archives/40367065.html</a></p>
+<p>SideM専用仕様です
+<br>ホシイモノ候補から<span style="color:red;">チェンジ後</span>のLvMAXステータスを入力して「計算」ボタンを押下してください</p>
+<p>※予想値ですので多少の差異が生じる可能性があります
+<br>※理想はチェンジ前のホシイモノ数値からの算出です。判明次第適用します</p>
+<br>
+<p><b>レベルアップ計算機能について</b></p>
+<p>「現在の経験値／MAX経験値」を入力してください</p>
+<br>
+<p>Last Update: 2015/05/17</p>
+<p>今後の拡張予定
+<br>・現在経験値／必要経験値→必要体力計算
+<br>・イベント用時速計算</p>
+<br>
+<br>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+body { background-color: #fff; color: #333; }
+a { color: #666; }
+a:visited { color: #999; }
+input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	vertical-align:middle;
+}
+input[type="number"] { width: 50px; }
+
+p, .small { font-size: small; }
+
+.table { display: table; }
+.tableRow { display: table-row; }
+.tableCell {
+	display: table-cell;
+	text-align: center;
+}
+
+/* 強化判定：520px以下の場合 */
+.orikaesi520 {
+	display: table-row;
+}
+
+/* 強化判定：520px以上の場合 */
+@media screen and (min-width : 520px) {
+	.orikaesi520 {
+		display: table-cell;
+	}
+}
+
+/* 適正エリア判定：410px以下の場合 */
+.orikaesi410 {
+	display: table-row;
+}
+
+/* 適正エリア判定：410px以上の場合 */
+@media screen and (min-width : 410px) {
+	.orikaesi410 {
+		display: table-cell;
+	}
+}
+

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Bootstrap Sample</title>
+		<!-- BootstrapのCSS読み込み -->
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<!-- jQuery読み込み -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+		<!-- BootstrapのJS読み込み -->
+		<script src="js/bootstrap.min.js"></script>
+		<!-- スクロールプラグイン読み込み -->
+		<script src="js/jquery.pageme.min.js"></script>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<h1>Hello world</h1>
+			<hr>
+			<h3>グリッドシステム</h3>
+			<p>
+				<a href="https://techacademy.jp/magazine/6270" target="_blank" class="btn btn-default">参考1</a>
+				<a href="http://www.tohoho-web.com/ex/bootstrap.html" target="_blank" class="btn btn-primary">参考2</a>
+			</p>
+			<p>合計12になるように一行あたりの幅割合を指定します。</p>
+			<p>幅が広い順に col-lg-{数値}, col-md-{数値}, col-sm-{数値}, col-xs-{数値} と値を指定することができます。</p>
+			<div class="row">
+				<div class="col-lg-10 col-md-8 col-sm-6 col-xs-12" style="background-color:red;">
+					広い方
+				</div>
+				<div class="col-lg-2 col-md-4 col-sm-6 col-xs-12" style="background-color:yellow;">
+					狭い方
+				</div>
+			</div>
+			<hr>
+			<h3>スクロールで自動読込</h3>
+			<p>
+				<a href="https://webkaru.net/jquery-plugin/pageme/" target="_blank" class="btn btn-info">参考3</a>
+			</p>
+			<p>合計12になるように一行あたりの幅割合を指定します。</p>
+			<div class="navigate">
+				<a class="next" href="next1.html">next</a>
+			</div>
+		</div>
+	</body>
+	<script>
+		$(document).ready(function() {
+			$(".container-fluid").pageme({
+				status     : '読み込み中',
+				loading    : 'Loading...',
+				finished   : 'Finished...',
+				error      : 'Error loading...',
+				statusfade : 500,
+				statuspause: 1000,
+				container  : '.container',
+				next       : '.next',
+				navigation : '.navigate',
+				nextfade   : 500,
+				type       : 'html'
+			});
+		});
+	</script>
+</html>

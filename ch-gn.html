@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<script src="https://code.jquery.com/jquery-3.4.0.slim.min.js"></script>
+	<title>ch-gn</title>
+</head>
+<body>
+	<div>
+		<p>start : <input type="number" id="tx-start" value="1"></p>
+		<p>end : <input type="number" id="tx-end" value="100"></p>
+		<p>name : <input type="text" id="tx-name" value="名無しの■"></p>
+		<p>datetime : <input type="date" id="tx-date" value="">
+			<br>
+			<input type="checkbox" name="ch-day" id="ch-day" checked="true">
+			<label for="ch-day">day</label>　<!--
+			--><input type="checkbox" name="ch-time" id="ch-time" checked="true">
+			<label for="ch-time">time</label>
+		</p>
+		<button onClick="exec()">exec</button>
+	</div>
+	<div>
+		<textarea name="" id="txa-execed" cols="30" rows="10"></textarea>
+		<!-- <br>
+		<button onClick="copy()">copy</button> -->
+	</div>
+	<script>
+		// Document Ready
+		$(function () {
+			// 今日の日付を#txt-dateに設定
+			var today = new Date();
+			today.setDate(today.getDate());
+			var yyyy = today.getFullYear();
+			var mm = ("0" + (today.getMonth() + 1)).slice(-2);
+			var dd = ("0" + today.getDate()).slice(-2);
+			$("#tx-date").val(yyyy + '-' + mm + '-' + dd);
+		}); // Document Ready
+
+		// スレッド作成
+		function exec(){
+			// 入力値取得
+			var st = Number($('#tx-start').val())
+			, en = Number($('#tx-end').val())
+			, nm = $('#tx-name').val()
+			, dt = new Date($('#tx-date').val());
+
+			var txt = "";
+			for (var i = st; i <= en; i++){
+				txt += i.toString() + ":" + nm + " " 
+					+ ($("#ch-day").prop("checked") ? dt.getFullYear().toString() + "/" + (dt.getMonth() + 1).toString() + "/" + dt.getDate().toString() : "")
+					+ ($("#ch-time").prop("checked") ? " HH:mm:ss" : "")
+					+ " ID:" + Math.random().toString(32).substring(2)
+					+ "\r\n\r\n";
+			}
+			$('#txa-execed').val(txt);
+
+			// コピーも一緒にやっちゃう
+			copy();
+		}
+
+		// コピー
+		function copy(){
+			window.getSelection().removeAllRanges();
+			var copyString = $('#txa-execed').val();
+			var element = document.createElement("pre");
+			element.id = "copyArea";
+			document.querySelector("body").appendChild(element);
+			document.querySelector("#copyArea").innerHTML = copyString;
+			var range = document.createRange();
+			range.selectNode(document.querySelector("#copyArea"));
+			window.getSelection().addRange(range);
+			var result = document.execCommand("copy");
+			window.getSelection().removeAllRanges();
+			element.parentNode.removeChild(element);
+			console.log("copy: " + result);
+			//onsole.log(copyString);
+		}
+	</script>
+</body>
+</html>

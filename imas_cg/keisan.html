@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript" src="../menu.js"></script>
+	<script type="text/javascript" src="keisan.js"></script>
+	<link rel="stylesheet" type="text/css" href="keisan.css">
+	<link rel="shortcut icon" href="../img/favicon.ico">
+	<title>計算ツールCG</title>
+	<meta name="viewport" content="width=device-width">
+</head>
+<body>
+<h3>計算ツールCG</h3>
+<h4>回復計算</h4>
+
+スタミナ：<input type="number" name="stamina_now" id="stamina_now" max="999" min="0">／<input type="number" name="stamina_max" id="stamina_max" max="999" min="0">　<input type="button" id="" value=" 変換 " onclick="change(0)">
+<div style="height: 10px;"></div>
+攻コスト：<input type="number" name="semekosu_now" id="semekosu_now" max="999" min="0">／<input type="number" name="semekosu_max" id="semekosu_max" max="999" min="0">　<input type="button" value=" 変換 " onclick="change(1)">
+
+<div style="height: 10px;"></div>
+到達時刻：<input type="number" name="limit_hour" id="limit_hour" max="999" min="0">：<input type="number" name="limit_min" id="limit_min" max="59" min="0">　<input type="button" value=" 変換 " onclick="change(2)">
+
+<div style="height: 10px;"></div>
+所要時間：<input type="number" name="hour" id="hour" max="999" min="0">時間<input type="number" name="min" id="min" max="59" min="0">分　<input type="button" value=" 変換 " onclick="change(3)">
+<br>
+<span id="errMessage" style="color: red;">&nbsp;</span>
+
+<p>現在時刻　　：<span id="currentTime"></span></p>
+<p>回復予定時刻：<span id="estimatedTime"></span></p>
+<div style="height: 10px;"></div>
+
+<form name="timer">
+	<input type="number" name="timer_hour" id="timer_hour" max="999" min="0">時間
+	<input type="number" name="timer_min" id="timer_min" max="59" min="0">分
+	<input type="number" name="timer_min" id="timer_second" max="59" min="0">秒
+	<br>
+	<input type="button" value="スタート" onclick="cntStart()">
+	<input type="button" value="ストップ" onclick="cntStop()">
+	<input type="button" value="リセット" onclick="reSet()">
+</form>
+
+<hr style="border-color: #666;">
+
+<h4>MMM予想値計算</h4>
+
+コスト<input type="number" name="cost" id="cost" max="99" min="0">　攻<input type="number" name="seme" id="seme" max="99999" min="0">　守<input type="number" name="mamori" id="mamori" max="99999" min="0">
+<div style="height: 10px;"></div>
+<input type="button" value=" 計算 " onclick="MMMkeisan()">
+<div style="height: 10px;"></div>
+<span style="color:#00bbff; font-weight: bold;">攻：</span><span id="MMM_Seme"></span>(コス比：<span id="Kosuhi_Seme">&nbsp;</span>)
+<br>
+<span style="color:#00bbff; font-weight: bold;">守：</span><span id="MMM_Mamori"></span>(コス比：<span id="Kosuhi_Mamori">&nbsp;</span>)
+<br>
+<hr style="border-color: #666;">
+
+<h4>ブックマークレット</h4>
+<a href="javascript:var beforeMoney=$(&quot;.yellow&quot;).text();var afterMoney=beforeMoney.replace(/,/g,&quot;&quot;);$(&quot;input[name='money_num']&quot;).val(afterMoney);$(&quot;form[name='gotrade']&quot;).submit();">トレード・マニー一発入力</a>
+<p>「トレード・マニー」画面で手持ちのマニーを全額入力してリストに追加します<br>
+実行後は「トレードを選択」画面に遷移します</p>
+<hr style="border-color: #666;">
+
+<p><b>概要</b></p>
+<p>ものぐさ向きのツールです
+<br>拡散・ご利用ご自由に</p>
+<p>作った人→<a href="https://twitter.com/mmtb_game" target="blank">@mmtb_game</a></p>
+<br>
+<p><b>各変換ボタンについて</b></p>
+<p>・スタミナ
+<br>　「現在のスタミナ／最大値」で入力して変換すると
+<br>　攻コスト・最大値に到達する時刻・所要時間を表示します</p>
+<p>・攻コスト
+<br>　「現在の攻コスト／最大値」で入力して変換すると
+<br>　スタミナ・最大値に到達する時刻・所要時間を表示します</p>
+<p>・到達時刻
+<br>　到達時刻までに回復できるスタミナ・攻コストを表示します
+<br>　所要時間は現在時刻からかかる時間を表示します</p>
+<p>・所要時間
+<br>　入力した時間で回復できるスタミナ・攻コストを表示します
+<br>　到達時刻は現在時刻に加算した時刻を表示します</p>
+<br>
+<p><b>タイマー機能について</b></p>
+<p>各変換ボタンを押下した際、所要時間と同じ値がセットされます
+<br>微調整したい場合は入力し直してください</p>
+<p>・スタートボタン：カウントダウン開始
+<br>・ストップボタン：停止
+<br>・リセットボタン：リセット</p>
+<p>カウントダウンが終了するとポップアップが表示されます</p>
+<p>例：1時間30分15秒をセット
+<br>→カウントダウン終了後「1時間30分15秒経過しました！」と表示</p>
+<p>※ページを再読込するとタイマーがリセットされます</p>
+<br>
+<p><b>MMM予想値計算機能について</b></p>
+<p>モバマス専用仕様です
+<br>アルバムに載っている特訓前のステータスを入力して「計算」ボタンを押下してください</p>
+<p>※予想値ですので多少の差異が生じる可能性があります
+<br>　現在確認済みの対象外カード
+<br>　・配布SR
+<br>　・招待SR
+<br>　・[神秘の女神]高垣楓、[ふわふわｽﾏｲﾙ]三村かな子
+<br>　　→古いSRは怪しい？かもです</p>
+<br>Last Update: 2015/06/19
+<br>
+<br>
+
+</body>
+</html>

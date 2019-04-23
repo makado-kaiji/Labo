@@ -1,0 +1,24 @@
+body {
+	background-color: #fff; color: #333;
+}
+
+a {
+	color: #666;
+}
+
+a:visited {
+	color: #999;
+}
+
+#stamina_now,#stamina_max
+,#hour,#min
+,#appeal_now,#appeal_max
+,#limit_hour,#limit_min
+,#timer_hour,#timer_min,#timer_second
+,#cost,#vocal,#dance, #visual {
+	width: 50px;
+}
+
+p, #errMessage {
+	font-size: small;
+}

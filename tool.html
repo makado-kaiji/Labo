@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<link rel="apple-touch-icon" href="img/favicon.ico" />
+	<link rel="shortcut icon" href="img/favicon.ico">
+	<title>ツール集</title>
+	<meta name="viewport" content="width=device-width">
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript" src="menu.js"></script>
+</head>
+<body>
+<h3>ツール集</h3>
+<p>色々やってます　お好きにどうぞ</p>
+<br>
+<h4>ブックマークレット</h4>
+<a href="javascript:var url=location.href;if(url.indexOf(':orig')==-1){url+=':orig';url=url.replace(':small','');url=url.replace(':medium','');url=url.replace(':large','');alert('RedirectURL: '+url);location.href=url;}">Twitterオリジナルサイズ画像表示</a>
+<p>Twitterの画像URLの末尾に「:orig」を付加してリダイレクトします</p>
+<a href="javascript:(function(){window.prompt('Title+URL',document.title+' '+document.URL);})();">タイトル＋URL取得</a>
+<p>現在開いているページのタイトルとURLをします<br>
+Twitterなどに投稿する時に便利です</p>
+<a href="javascript:win=window.open(location.href,'sample','directories=no,location=yes,menubar=yes,scrollbars=yes,status=no,toolbar=no,personalbar=no,width=340,height=750');win.focus();">340×750pxウィンドウ表示</a>
+<p>現在開いているURLをウィンドウで開き直します<br>
+ソシャゲを同時に沢山やる人向け</p>
+<br>
+<p>Last Update: 2015/05/29</p>
+<br>
+<br>
+
+</body>
+</html>

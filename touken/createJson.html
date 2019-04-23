@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>計算乱舞JSONメーカー</title>
+	<meta name="viewport" content="width=device-width">
+	<style type="text/css">
+		.table { display: table; }
+		.tableRow { display: table-row; }
+		.tableCell { display: table-cell; }
+		#txtJson { width: 180px; }
+	</style>
+	<script type="text/javascript">
+		function kyoukaHantei() {
+			var str = '{'
+						+ '"id": ' + getEl("numID") + ','
+						+ '"name": "' + getEl("txtName") + '",'
+						+ '"status": {'
+							+ '"seizon": ' + getEl("numSeizon") + ','
+							+ '"dageki": ' + getEl("numDageki") + ','
+							+ '"tousotu": ' + getEl("numTousotu") + ','
+							+ '"kidou": ' + getEl("numKidou") + ','
+							+ '"syouryoku": ' + getEl("numSyouryoku") + ','
+							+ '"hissatu": ' + getEl("numHissatu") + ','
+							+ '"teisatu": ' + getEl("numTeisatu") + ','
+							+ '"inpei": ' + getEl("numInpei") + ''
+						+ '},'
+						+ '"status_toku": {'
+							+ '"seizon": ' + getEl("numSeizon_t") + ','
+							+ '"dageki": ' + getEl("numDageki_t") + ','
+							+ '"tousotu": ' + getEl("numTousotu_t") + ','
+							+ '"kidou": ' + getEl("numKidou_t") + ','
+							+ '"syouryoku": ' + getEl("numSyouryoku_t") + ','
+							+ '"hissatu": ' + getEl("numHissatu_t") + ','
+							+ '"teisatu": ' + getEl("numTeisatu_t") + ','
+							+ '"inpei": ' + getEl("numInpei_t") + ''
+						+ '}'
+					+ '}';
+			var txtJson = document.getElementById("txtJson");
+			txtJson.value = str;
+		}
+		function getEl(id) {
+			console.log(id);
+			if (document.getElementById(id).value) {
+				return document.getElementById(id).value.toString();
+			} else {
+				return document.getElementById(id).innerText;
+			}
+		}
+	</script>
+</head>
+
+<body>
+ID：<input type="number" name="numID" id="numID" max="999" min="0" onblur="kyoukaHantei()">　名前：<input type="textarea" name="txtName" id="txtName" onblur="kyoukaHantei()">
+<br><br>
+
+<div class="table">
+	<div class="tableRow">
+		<div class="tableCell">生存</div>
+		<div class="tableCell"><input type="number" name="numSeizon" id="numSeizon" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">打撃</div>
+		<div class="tableCell"><input type="number" name="numDageki" id="numDageki" max="99" min="0" onblur="kyoukaHantei()"></div>
+	</div>
+	<div class="tableRow">
+		<div class="tableCell">統率</div>
+		<div class="tableCell"><input type="number" name="numTousotu" id="numTousotu" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">機動</div>
+		<div class="tableCell"><input type="number" name="numKidou" id="numKidou" max="99" min="0" onblur="kyoukaHantei()"></div>
+	</div>
+	<div class="tableRow">
+		<div class="tableCell">衝力</div>
+		<div class="tableCell"><input type="number" name="numSyouryoku" id="numSyouryoku" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">範囲</div>
+		<div class="tableCell"><input type="number" name="numHani" id="numHani" max="99" min="0" disabled></div>
+	</div>
+	<div class="tableRow">
+		<div class="tableCell">必殺</div>
+		<div class="tableCell"><input type="number" name="numHissatu" id="numHissatu" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">偵察</div>
+		<div class="tableCell"><input type="number" name="numTeisatu" id="numTeisatu" max="99" min="0" onblur="kyoukaHantei()"></div>
+	</div>
+	<div class="tableRow">
+		<div class="tableCell">隠蔽</div>
+		<div class="tableCell"><input type="number" name="numInpei" id="numInpei" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">装備</div>
+		<div class="tableCell"><input type="number" name="numSoubi" id="numSoubi" max="99" min="0" disabled></div>
+	</div>
+</div>
+<br>
+<div>特</div>
+<div class="table">
+	<div class="tableRow">
+		<div class="tableCell">生存</div>
+		<div class="tableCell"><input type="number" name="numSeizon_t" id="numSeizon_t" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">打撃</div>
+		<div class="tableCell"><input type="number" name="numDageki_t" id="numDageki_t" max="99" min="0" onblur="kyoukaHantei()"></div>
+	</div>
+	<div class="tableRow">
+		<div class="tableCell">統率</div>
+		<div class="tableCell"><input type="number" name="numTousotu_t" id="numTousotu_t" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">機動</div>
+		<div class="tableCell"><input type="number" name="numKidou_t" id="numKidou_t" max="99" min="0" onblur="kyoukaHantei()"></div>
+	</div>
+	<div class="tableRow">
+		<div class="tableCell">衝力</div>
+		<div class="tableCell"><input type="number" name="numSyouryoku_t" id="numSyouryoku_t" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">範囲</div>
+		<div class="tableCell"><input type="number" name="numHani_t" id="numHani_t" max="99" min="0" disabled></div>
+	</div>
+	<div class="tableRow">
+		<div class="tableCell">必殺</div>
+		<div class="tableCell"><input type="number" name="numHissatu_t" id="numHissatu_t" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">偵察</div>
+		<div class="tableCell"><input type="number" name="numTeisatu_t" id="numTeisatu_t" max="99" min="0" onblur="kyoukaHantei()"></div>
+	</div>
+	<div class="tableRow">
+		<div class="tableCell">隠蔽</div>
+		<div class="tableCell"><input type="number" name="numInpei_t" id="numInpei_t" max="99" min="0" onblur="kyoukaHantei()"></div>
+		<div class="tableCell">装備</div>
+		<div class="tableCell"><input type="number" name="numSoubi_t" id="numSoubi_t" max="99" min="0" disabled></div>
+	</div>
+</div>
+<br>
+<textarea name="txtJson" id="txtJson"></textarea>
+<br>
+<a href="http://syncer.jp/json-prettyprint">整形</a>
+</body>
+</html>

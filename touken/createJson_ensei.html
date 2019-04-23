@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>計算乱舞遠征JSONメーカー</title>
+	<meta name="viewport" content="width=device-width">
+	<style type="text/css">
+		.table { display: table; }
+		.tableRow { display: table-row; }
+		.tableCell { display: table-cell; }
+		#txtJson { width: 180px; }
+	</style>
+	<script type="text/javascript">
+		function createJson() {
+			var str = '{'
+					+ '"id": "' + getEl("txtId") + '",'
+					+ '"memoryName": "' + getEl("selMemoryName") + '",'
+					+ '"missionName": "' + getEl("txtMissionName") + '",'
+					+ '"level": ' + getEl("numLevel") + ','
+					+ '"hensei": {'
+						+ '"tantou": ' + document.getElementById("chkTantou").checked + ','
+						+ '"wakizasi": ' + document.getElementById("chkWakizasi").checked + ','
+						+ '"utigatana": ' + document.getElementById("chkUtigatana").checked + ','
+						+ '"tati": ' + document.getElementById("chkTati").checked + ','
+						+ '"ootati": ' + document.getElementById("chkOotati").checked + ','
+						+ '"yari": ' + document.getElementById("chkYari").checked + ','
+						+ '"naginata": ' + document.getElementById("chkNaginata").checked
+					+ '},'
+					+ '"hour": ' + getEl("numHour") + ','
+					+ '"min": ' + getEl("numMin") + ','
+					+ '"mokutan": ' + getEl("numMokutan") + ','
+					+ '"mokutan_max": ' + getEl("numMokutan_Max") + ','
+					+ '"tamahagane": ' + getEl("numTamahagane") + ','
+					+ '"tamahagane_max": ' + getEl("numTamahagane_Max") + ','
+					+ '"reikyakuzai": ' + getEl("numReikyakuzai") + ','
+					+ '"reikyakuzai_max": ' + getEl("numReikyakuzai_Max") + ','
+					+ '"togiisi": ' + getEl("numTogiisi") + ','
+					+ '"togiisi_max": ' + getEl("numTogiisi_Max") + ','
+					+ '"iraihuda": ' + getEl("numIraihuda") + ','
+					+ '"tetudaihuda": ' + getEl("numTetudaihuda") + ','
+					+ '"koban": ' + getEl("selKoban") + ''
+					+ '}';
+			var txtJson = document.getElementById("txtJson");
+			txtJson.value = str;
+		}
+		function getEl(id) {
+			console.log(id);
+			if (document.getElementById(id).value) {
+				return document.getElementById(id).value.toString();
+			} else {
+				return document.getElementById(id).innerText;
+			}
+		}
+	</script>
+</head>
+
+<body>
+<!-- ID -->
+<input type="text"  id="txtId" size="2" onblur="createJson()">
+<!-- 記憶 -->
+<select id="selMemoryName" onblur="createJson()">
+	<option>維新の記憶</option>
+	<option>江戸の記憶</option>
+	<option>織豊の記憶</option>
+	<option>戦国の記憶</option>
+	<option>武家の記憶</option>
+</select>
+<!-- 任務 -->
+<input type="text" id="txtMissionName" size="10" onblur="createJson()">
+<br>
+<!-- レベル -->
+<input type="number" id="numLevel" max="999" min="0" onblur="createJson()">Lv
+<br>
+<!-- 編成 -->
+<label><input type="checkbox" id="chkTantou">短</label>
+<label><input type="checkbox" id="chkWakizasi">脇</label>
+<label><input type="checkbox" id="chkUtigatana">打</label>
+<label><input type="checkbox" id="chkTati">太</label>
+<label><input type="checkbox" id="chkOotati">大</label>
+<label><input type="checkbox" id="chkYari">槍</label>
+<label><input type="checkbox" id="chkNaginata">薙</label>
+<br>
+<!-- 時間 -->
+<input type="number" id="numHour" max="99" min="0" onblur="createJson()">：<input type="number" id="numMin" max="99" min="0" onblur="createJson()">
+<div class="table">
+	<!-- 木炭 -->
+	<div class="tableRow">
+		<div class="tableCell">木炭</div>
+		<div class="tableCell">
+			<input type="number" id="numMokutan" max="999" min="0" onblur="createJson()">
+		</div>
+		<div class="tableCell">（</div>
+		<div class="tableCell">
+			<input type="number" id="numMokutan_Max" max="999" min="0" onblur="createJson()">
+		</div>
+		<div class="tableCell">）</div>
+	</div>
+	<!-- 玉鋼 -->
+	<div class="tableRow">
+		<div class="tableCell">玉鋼</div>
+		<div class="tableCell">
+			<input type="number" id="numTamahagane" max="999" min="0" onblur="createJson()">
+		</div>
+		<div class="tableCell">（</div>
+		<div class="tableCell">
+			<input type="number" id="numTamahagane_Max" max="999" min="0" onblur="createJson()">
+		</div>
+		<div class="tableCell">）</div>
+	</div>
+	<!-- 冷却材 -->
+	<div class="tableRow">
+		<div class="tableCell">冷却材　</div>
+		<div class="tableCell">
+			<input type="number" id="numReikyakuzai" max="999" min="0" onblur="createJson()">
+		</div>
+		<div class="tableCell">（</div>
+		<div class="tableCell">
+			<input type="number" id="numReikyakuzai_Max" max="999" min="0" onblur="createJson()">
+		</div>
+		<div class="tableCell">）</div>
+	</div>
+	<!-- 砥石 -->
+	<div class="tableRow">
+		<div class="tableCell">砥石</div>
+		<div class="tableCell">
+			<input type="number" id="numTogiisi" max="999" min="0" onblur="createJson()">
+		</div>
+		<div class="tableCell">（</div>
+		<div class="tableCell">
+			<input type="number" id="numTogiisi_Max" max="999" min="0" onblur="createJson()">
+		</div>
+		<div class="tableCell">）</div>
+	</div>
+	<!-- 依頼札 -->
+	<div class="tableRow">
+		<div class="tableCell">依頼札</div>
+		<div class="tableCell">
+			<input type="number" id="numIraihuda" max="3" min="0" onblur="createJson()">
+		</div>
+	</div>
+	<!-- 手伝い札 -->
+	<div class="tableRow">
+		<div class="tableCell">手伝い札</div>
+		<div class="tableCell">
+			<input type="number" id="numTetudaihuda" max="3" min="0" onblur="createJson()">
+		</div>
+	</div>
+	<!-- 小判箱 -->
+	<div class="tableRow">
+		<div class="tableCell">小判箱</div>
+		<div class="tableCell">
+			<select id="selKoban" onblur="createJson()">
+				<option value="0">なし</option>
+				<option value="1">小</option>
+				<option value="2">中</option>
+				<option value="3">大</option>
+			</select>
+		</div>
+	</div>
+</div>
+<!-- JSON -->
+<textarea id="txtJson"></textarea>
+<br>
+<a href="http://syncer.jp/json-prettyprint">整形</a>
+</body>
+</html>
