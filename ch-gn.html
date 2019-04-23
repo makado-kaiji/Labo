@@ -48,8 +48,8 @@
 
 			var txt = "";
 			for (var i = st; i <= en; i++){
-				txt += i.toString() + ":" + nm + " " 
-					+ ($("#ch-day").prop("checked") ? dt.getFullYear().toString() + "/" + (dt.getMonth() + 1).toString() + "/" + dt.getDate().toString() : "")
+				txt += i.toString() + ":" + nm
+					+ ($("#ch-day").prop("checked") ? " " +  dt.getFullYear().toString() + "/" + (dt.getMonth() + 1).toString() + "/" + dt.getDate().toString() : "")
 					+ ($("#ch-time").prop("checked") ? " HH:mm:ss" : "")
 					+ " ID:" + Math.random().toString(32).substring(2)
 					+ "\r\n\r\n";
