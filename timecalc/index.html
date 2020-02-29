@@ -3,9 +3,84 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
+	<title>汎用時刻計算(新)</title>
+	<script src="../js/library/vue.2.6.11.min.js"></script>
 </head>
 <body>
-	
+<main>
+	<h4>汎用時刻計算</h4>
+	<span>{{nowDateTime}}</span>
+	<div>
+		<span>回復基準：</span>
+		<input type="number" id="numBaseTime" max="99" min="0" value="5">
+		<span>分／1回復</span>
+	</div>
+
+	<div>
+		<span>回復量　：</span>
+		<input type="number" class="numTargetValue" max="999" min="0" >
+		<input type="button" id="btnTargetValue" value=" 変換 ">
+	</div>
+
+	<div>
+		<span>所要時間：</span>
+		<input type="number" class="numRequiredTime hour" max="999" min="0" >
+		<span>時間</span>
+		<input type="number" class="numRequiredTime min" max="59" min="0" >
+		<span>分</span>
+		<input type="button" id="btnRequiredTime" value=" 変換 ">
+	</div>
+
+	<div>
+		<span>到達時刻：</span>
+		<input type="number" class="numTargetTime hour" max="999" min="0" >
+		<span>時</span>
+		<input type="number" class="numTargetTime min" max="59" min="0" >
+		<span>分</span>
+		<input type="button" id="btnTargetTime" value=" 変換 ">
+	</div>
+
+	<p style="font-size: x-small;">※Enterキーでも実行できます</p>
+
+	<div>
+		<input type="button" id="btnStartTimer" value=" タイマースタート ">
+		<span id="timerResult"></span>
+	</div>
+
+<p v-bind:style="style.footer">Last Update: 2020/02/29</p>
+
+</main>
+<script>
+	const dateShow = (d = new Date()) => {
+		return `${d.getFullYear()}/${d.getMonth().toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}(${'日月火水木金土'[d.getDay()]}) ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+	}
+
+	let vm = new Vue({
+		el:'main',
+		data:{
+			style:{
+				footer:{
+					'font-size':'small',
+					position: 'absolute',
+					bottom: '0px',
+				},
+			},
+			nowDateTime: '',
+			intervalDateTime: undefined,
+		},
+		computed:{
+		},
+		method:{
+		},
+		mounted () { 
+			this.intervalDateTime = setInterval(() => {
+				this.nowDateTime = dateShow();
+			}, 1000);
+		 },
+		destroyed() {
+			clearInterval(this.intervalDateTime);
+		},
+	});
+</script>
 </body>
 </html>
