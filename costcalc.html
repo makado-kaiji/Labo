@@ -6,52 +6,72 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 	<title>コスパ計算</title>
+	<style>
+		.table thead tr {
+			border-bottom: 1px solid #ccc;
+		}
+		.table th {
+			font-size: small;
+		}
+		.table td input {
+			width: calc(100vw / 4.5);
+		}
+		.table [data-item_id^='button-'] td {
+			text-align: right;
+			border-bottom: 1px solid #ccc;
+		}
+	</style>
 </head>
 <body>
 	<div id="vue">
 		<h4>コスパ計算</h4>
 		<div class="table">
 			<table>
-				<th>
+				<thead>
 					<tr>
-						<td>金額</td>
-						<td>個数</td>
-						<td>個/円</td><!-- 安い方が得 -->
-						<td>メモ</td>
+						<th>金額</th>
+						<th>個数</th>
+						<th>個/円</th><!-- 安い方が得 -->
 					</tr>
-				</th>
-				<tr v-for="(item, itemIndex) in items" v-bind:key="`item-1-${itemIndex}`">
-					<td>
-						<input type="tel" v-model="item.amount">
-					</td>
-					<td>
-						<input type="tel" v-model="item.count">
-					</td>
-					<td>
-						<!-- 小数点第2位で切捨 -->
-						<input type="tel" v-bind:value="item.amount && item.count ? Math.floor((item.amount / item.count) * 100) / 100 : null">
-					</td>
-					<td>
-						<input type="text" v-model="item.memo">
-					</td>
-					<td v-if="items.length > 1">
-						<button
-							v-on:click="upRow(itemIndex)"
-							v-bind:style="`opacity: ${itemIndex !== 0 ? 1 : 0};`"
-							v-bind:disabled="itemIndex === 0"
-						>
-							↑
-						</button>
-						<button
-							v-on:click="downRow(itemIndex)"
-							v-bind:style="`opacity: ${itemIndex !== items.length - 1 ? 1 : 0};`"
-							v-bind:disabled="itemIndex === items.length - 1"
-						>
-							↓
-						</button>
-						<button v-on:click="deleteRow(itemIndex)">－</button>
-					</td>
-				</tr>
+				</thead>
+				<tbody>
+					<!-- データ毎に2行出力する -->
+					<template v-for="(item, itemIndex) in items">
+
+						<!-- エディタ行 -->
+						<tr v-bind:key="`item-1-${itemIndex}`" v-bind:data-item_id="`data-${itemIndex + 1}`">
+							<td>
+								<input type="tel" v-model="item.amount">
+							</td>
+							<td>
+								<input type="tel" v-model="item.count">
+							</td>
+							<td>
+								<!-- 小数点第2位で切捨 -->
+								<input type="tel" v-bind:value="item.amount && item.count ? Math.floor((item.amount / item.count) * 100) / 100 : null">
+							</td>
+						</tr>
+
+						<!-- メモ・ボタン行 -->
+						<tr v-bind:key="`item-2-${itemIndex}`" v-bind:data-item_id="`button-${itemIndex + 1}`">
+							<td v-bind:colspan="items.length > 1 ? 2 : 3">
+								<input type="text" v-model="item.memo">
+							</td>
+							<td v-if="items.length > 1">
+								<button
+									v-on:click="upRow(itemIndex)"
+									v-bind:style="`opacity: ${itemIndex !== 0 ? 1 : 0};`"
+									v-bind:disabled="itemIndex === 0"> ↑ </button>
+								<button
+									v-on:click="downRow(itemIndex)"
+									v-bind:style="`opacity: ${itemIndex !== items.length - 1 ? 1 : 0};`"
+									v-bind:disabled="itemIndex === items.length - 1"> ↓ </button>
+								<button v-on:click="deleteRow(itemIndex)">－</button>
+							</td>
+						</tr>
+
+					</template>
+				</tbody>
 			</table>
 		</div>
 		<div class="buttons">
