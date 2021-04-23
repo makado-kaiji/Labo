@@ -105,12 +105,6 @@
 
 			/** 上の行と入替 */
 			upRow(itemIndex) {
-				console.log(`上の行と入替: ${itemIndex}`)
-				// const temp = this.items[itemIndex];
-				// this.items[itemIndex] = this.items[itemIndex - 1];
-				// this.items[itemIndex - 1] = temp;
-
-				// ↑の入替方式だとDOMに反映されないので、spliceを使う
 				const temp = this.items[itemIndex];
 				this.items.splice(itemIndex, 1)
 				this.items.splice(itemIndex - 1, 0, temp)
@@ -118,12 +112,6 @@
 			
 			/** 下の行と入替 */
 			downRow(itemIndex) {
-				console.log(`下の行と入替: ${itemIndex}`)
-				// const temp = this.items[itemIndex];
-				// this.items[itemIndex] = this.items[itemIndex + 1];
-				// this.items[itemIndex + 1] = temp;
-
-				// ↑の入替方式だとDOMに反映されないので、spliceを使う
 				const temp = this.items[itemIndex];
 				this.items.splice(itemIndex, 1)
 				this.items.splice(itemIndex + 1, 0, temp)
