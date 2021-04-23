@@ -13,12 +13,14 @@
 		.table th {
 			font-size: small;
 		}
-		.table td input {
-			width: calc(100vw / 4.5);
+		.table td input:not(.memo) {
+			width: calc(100vw / 3.5);
+		}
+		.table td input.memo {
+			width: calc(100% - 8px);
 		}
 		.table [data-item_id^='button-'] td {
 			text-align: right;
-			border-bottom: 1px solid #ccc;
 		}
 	</style>
 </head>
@@ -55,7 +57,7 @@
 						<!-- メモ・ボタン行 -->
 						<tr v-bind:key="`item-2-${itemIndex}`" v-bind:data-item_id="`button-${itemIndex + 1}`">
 							<td v-bind:colspan="items.length > 1 ? 2 : 3">
-								<input type="text" v-model="item.memo">
+								<input type="text" v-model="item.memo" placeholder="メモ" class="memo">
 							</td>
 							<td v-if="items.length > 1">
 								<button
