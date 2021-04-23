@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+	<title>コスパ計算</title>
+</head>
+<body>
+	<div id="vue">
+		<h4>コスパ計算</h4>
+		<div class="table">
+			<table>
+				<th>
+					<tr>
+						<td>金額</td>
+						<td>個数</td>
+						<td>個/円</td><!-- 安い方が得 -->
+						<td>メモ</td>
+					</tr>
+				</th>
+				<tr v-for="(item, itemIndex) in items" v-bind:key="`item-1-${itemIndex}`">
+					<td>
+						<input type="tel" v-model="item.amount">
+					</td>
+					<td>
+						<input type="tel" v-model="item.count">
+					</td>
+					<td>
+						<!-- 小数点第2位で切捨 -->
+						<input type="tel" v-bind:value="item.amount && item.count ? Math.floor((item.amount / item.count) * 100) / 100 : null">
+					</td>
+					<td>
+						<input type="text" v-model="item.memo">
+					</td>
+					<td v-if="items.length > 1">
+						<button
+							v-on:click="upRow(itemIndex)"
+							v-bind:style="`opacity: ${itemIndex !== 0 ? 1 : 0};`"
+							v-bind:disabled="itemIndex === 0"
+						>
+							↑
+						</button>
+						<button
+							v-on:click="downRow(itemIndex)"
+							v-bind:style="`opacity: ${itemIndex !== items.length - 1 ? 1 : 0};`"
+							v-bind:disabled="itemIndex === items.length - 1"
+						>
+							↓
+						</button>
+						<button v-on:click="deleteRow(itemIndex)">－</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="buttons">
+			<table>
+				<tr>
+					<td>
+						<button v-on:click="addRow">＋</button>
+					</td>
+					<td>
+						<button v-on:click="save">保存</button>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="message">
+			<p>最終保存日時：{{ saveDate }}</p>
+		</div>
+	</div>
+	<script>
+	let vue = new Vue({
+		el: '#vue',
+		data: {
+			items:[
+				{
+					amount: null,
+					count: null,
+					memo: null,
+				},
+			],
+			saveDate: null,
+		},
+		mounted() {
+			// localStorageにあれば採用、無ければ空1行表示
+			if (localStorage.items) {
+				this.items = JSON.parse(localStorage.items)
+				console.log('localStorageから適用: items')
+			}
+			if (localStorage.saveDate) {
+				this.saveDate = localStorage.saveDate.split('"').join('')
+				console.log('localStorageから適用: saveDate')
+			}
+		},
+		methods: {
+			/** 行追加 */
+			addRow () {
+				this.items.push({
+					amount: null,
+					count: null,
+				})
+			},
+
+			/** 上の行と入替 */
+			upRow(itemIndex) {
+				console.log(`上の行と入替: ${itemIndex}`)
+				// const temp = this.items[itemIndex];
+				// this.items[itemIndex] = this.items[itemIndex - 1];
+				// this.items[itemIndex - 1] = temp;
+
+				// ↑の入替方式だとDOMに反映されないので、spliceを使う
+				const temp = this.items[itemIndex];
+				this.items.splice(itemIndex, 1)
+				this.items.splice(itemIndex - 1, 0, temp)
+			},
+			
+			/** 下の行と入替 */
+			downRow(itemIndex) {
+				console.log(`下の行と入替: ${itemIndex}`)
+				// const temp = this.items[itemIndex];
+				// this.items[itemIndex] = this.items[itemIndex + 1];
+				// this.items[itemIndex + 1] = temp;
+
+				// ↑の入替方式だとDOMに反映されないので、spliceを使う
+				const temp = this.items[itemIndex];
+				this.items.splice(itemIndex, 1)
+				this.items.splice(itemIndex + 1, 0, temp)
+			},
+			
+			/** 行削除 */
+			deleteRow (itemIndex) {
+				const result = confirm('本当に削除する？')
+				if (result) {
+					this.items.splice(itemIndex, 1)
+				}
+			},
+
+			/** 保存 */
+			save () {
+				this.saveDate = (new Date()).toLocaleString()
+				localStorage.items = JSON.stringify(this.items)
+				localStorage.saveDate = JSON.stringify(this.saveDate)
+			},
+		},
+	})
+	</script>
+</body>
+</html>
