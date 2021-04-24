@@ -7,6 +7,13 @@
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
 	<title>コスパ計算</title>
 	<style>
+		body {
+			padding:0;
+			margin:0;
+		}
+		table {
+			border-collapse:collapse;
+		}
 		.table thead tr {
 			border-bottom: 1px solid #ccc;
 		}
@@ -17,10 +24,11 @@
 			width: calc(100vw / 3.5);
 		}
 		.table td input.memo {
-			width: calc(100% - 8px);
+			width: calc(100% - 10px);
 		}
 		.table [data-item_id^='button-'] td {
 			text-align: right;
+			border-bottom: 1px solid #ccc;
 		}
 	</style>
 </head>
@@ -50,7 +58,7 @@
 							</td>
 							<td>
 								<!-- 小数点第2位で切捨 -->
-								<input type="tel" v-bind:value="item.amount && item.count ? Math.floor((item.amount / item.count) * 100) / 100 : null">
+								<input type="tel" v-bind:value="item.amount && item.count ? Math.floor((item.amount / item.count) * 100) / 100 : null" readonly style="border: none; text-align: center;">
 							</td>
 						</tr>
 
@@ -72,6 +80,11 @@
 							</td>
 						</tr>
 
+						<!-- 空白用 -->
+						<tr>
+							<td></td>
+						</tr>
+
 					</template>
 				</tbody>
 			</table>
@@ -90,6 +103,10 @@
 		</div>
 		<div class="message">
 			<p>最終保存日時：{{ saveDate }}</p>
+		</div>
+
+		<div>
+			<button v-on:click="clearCash">キャッシュクリア</button>
 		</div>
 	</div>
 	<script>
@@ -152,6 +169,19 @@
 				this.saveDate = (new Date()).toLocaleString()
 				localStorage.items = JSON.stringify(this.items)
 				localStorage.saveDate = JSON.stringify(this.saveDate)
+			},
+
+			/** キャッシュを無視して再読込 */
+			clearCash () {
+				// 既にQueryが付いていた場合は削除
+				let url = location.href.replace(location.search, '')
+
+				// キャッシュ無視パラメーターを作成して画面遷移
+				url += `?${new URLSearchParams({
+					_: (new Date()).getTime()
+				})}`
+
+				location.href = url
 			},
 		},
 	})
