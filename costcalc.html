@@ -79,8 +79,8 @@
 								<input type="tel" v-model="item.count" placeholder="個数">
 							</td>
 							<td>
-								<!-- 小数点第2位で切捨 -->
-								<input type="tel" v-bind:value="item.amount && item.count ? Math.floor((item.amount / item.count) * 100) / 100 : null" readonly style="border: none; text-align: center;">
+								<!-- 小数点第3位で切捨 -->
+								<input type="tel" v-bind:value="item.amount && item.count ? Math.floor((item.amount / item.count) * 1000) / 1000 : null" readonly style="border: none; text-align: center;">
 							</td>
 						</tr>
 
