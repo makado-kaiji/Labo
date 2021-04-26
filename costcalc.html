@@ -73,10 +73,10 @@
 						<!-- エディタ行 -->
 						<tr v-bind:key="`item-1-${itemIndex}`" v-bind:data-item_id="`data-${itemIndex + 1}`">
 							<td>
-								<input type="tel" v-model="item.amount">
+								<input type="tel" v-model="item.amount" placeholder="金額">
 							</td>
 							<td>
-								<input type="tel" v-model="item.count">
+								<input type="tel" v-model="item.count" placeholder="個数">
 							</td>
 							<td>
 								<!-- 小数点第2位で切捨 -->
