@@ -10,7 +10,7 @@
 		body {
 			padding:0;
 			margin:0;
-			padding-bottom: env(safe-area-inset-bottom);
+			padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
 		}
 		table {
 			border-collapse:collapse;
@@ -42,10 +42,17 @@
 		.calculator table {
 			border: 1px solid #ccc;
 			margin: 1em;
+			font-size: 1.5em;
 		}
 		.calculator .result {
 			border: 1px solid #ccc;
 			text-align: right;
+		}
+		.calculator td {
+			text-align: center;
+		}
+		.calculator td input[type="button"] {
+			font-size: 1.5em;
 		}
 		/* .calculator ここまで */
 	</style>
@@ -135,7 +142,7 @@
 						<td colspan="4" class="result">{{ calc }}</td>
 					</tr>
 					<tr>
-						<td><button v-on:click="calc = '0'">C</button></td>
+						<td><input type="button" value="C" v-on:click="calc = '0'"></td>
 						<td>&nbsp;</td>
 						<td>&nbsp;</td>
 						<td><input type="button" value="/" v-on:click="calcInput"></td>
@@ -167,6 +174,8 @@
 				</tbody>
 			</table>
 		</div>
+
+		<br><br>
 	</div>
 	<script>
 	let vue = new Vue({
