@@ -14,6 +14,8 @@
 		table {
 			border-collapse:collapse;
 		}
+
+		/* .table ここから */
 		.table thead tr {
 			border-bottom: 1px solid #ccc;
 		}
@@ -30,6 +32,17 @@
 			text-align: right;
 			border-bottom: 1px solid #ccc;
 		}
+		/* .table ここまで */
+
+		/* .calculator ここから */
+		.calculator h5 {
+			margin-bottom: 5px;
+		}
+		.calculator .result {
+			border: 1px solid #ccc;
+			text-align: right;
+		}
+		/* .calculator ここまで */
 	</style>
 </head>
 <body>
@@ -98,6 +111,9 @@
 					<td>
 						<button v-on:click="save">保存</button>
 					</td>
+					<td>
+						<button v-on:click="clearCash">キャッシュクリア</button>
+					</td>
 				</tr>
 			</table>
 		</div>
@@ -105,8 +121,46 @@
 			<p>最終保存日時：{{ saveDate }}</p>
 		</div>
 
-		<div>
-			<button v-on:click="clearCash">キャッシュクリア</button>
+		<!-- 電卓 -->
+		<div class="calculator">
+			<h5>電卓</h5>
+			<table>
+				<tbody>
+					<tr>
+						<td colspan="4" class="result">{{ calc }}</td>
+					</tr>
+					<tr>
+						<td><button v-on:click="calc = '0'">C</button></td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td><input type="button" value="/" v-on:click="calcInput"></td>
+					</tr>
+					<tr>
+						<td><input type="button" value="7" v-on:click="calcInput"></td>
+						<td><input type="button" value="8" v-on:click="calcInput"></td>
+						<td><input type="button" value="9" v-on:click="calcInput"></td>
+						<td><input type="button" value="*" v-on:click="calcInput"></td>
+					</tr>
+					<tr>
+						<td><input type="button" value="4" v-on:click="calcInput"></td>
+						<td><input type="button" value="5" v-on:click="calcInput"></td>
+						<td><input type="button" value="6" v-on:click="calcInput"></td>
+						<td><input type="button" value="-" v-on:click="calcInput"></td>
+					</tr>
+					<tr>
+						<td><input type="button" value="1" v-on:click="calcInput"></td>
+						<td><input type="button" value="2" v-on:click="calcInput"></td>
+						<td><input type="button" value="3" v-on:click="calcInput"></td>
+						<td><input type="button" value="+" v-on:click="calcInput"></td>
+					</tr>
+					<tr>
+						<td><input type="button" value="0" v-on:click="calcInput"></td>
+						<td>&nbsp;</td>
+						<td><input type="button" value="." v-on:click="calcInput"></td>
+						<td><input type="button" value="=" v-on:click="calcExec"></td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</div>
 	<script>
@@ -121,6 +175,7 @@
 				},
 			],
 			saveDate: null,
+			calc: '0', // 電卓用文字列
 		},
 		mounted() {
 			// localStorageにあれば採用、無ければ空1行表示
@@ -183,6 +238,24 @@
 
 				location.href = url
 			},
+
+			/** 電卓入力 */
+			calcInput(event) {
+				// 初期値0なら上書き、それ以外なら追加していく
+				this.calc = this.calc === '0' ? event.target.value : this.calc + event.target.value
+			},
+
+			/** 電卓計算結果反映 */
+			calcExec () {
+				// 文字列として保持していた計算を実行
+				// https://techacademy.jp/magazine/21139
+				this.calc = new Function("return " + this.calc)()
+
+				// 小数点4桁以下は切り捨て(切り捨て結果が違う場合のみ実行)
+				if (this.calc !== Math.floor(this.calc * 10000) / 10000) {
+					this.calc = (Math.floor(this.calc * 10000) / 10000).toString() + '...'
+				}
+			}
 		},
 	})
 	</script>
