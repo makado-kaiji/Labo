@@ -255,8 +255,10 @@
 
 			/** 電卓入力 */
 			calcInput(event) {
-				// 初期値0なら上書き、それ以外なら追加していく
-				this.calc = this.calc === '0' ? event.target.value : this.calc + event.target.value
+				// 初期値0 かつ 入力値が「.」でないなら上書き、それ以外なら追加していく
+				this.calc = this.calc === '0' && event.target.value !== '.'
+									? event.target.value
+									: this.calc + event.target.value
 			},
 
 			/** 電卓計算結果反映 */
