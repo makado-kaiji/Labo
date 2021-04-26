@@ -53,6 +53,7 @@
 		}
 		.calculator td input[type="button"] {
 			font-size: 1em;
+			touch-action: manipulation;
 		}
 		/* .calculator ここまで */
 	</style>
@@ -262,9 +263,6 @@
 				this.calc = this.calc === '0' && event.target.value !== '.'
 									? event.target.value
 									: this.calc + event.target.value
-				
-				// 伝播キャンセル
-				event.stopPropagation()
 			},
 
 			/** 電卓計算結果反映 */
