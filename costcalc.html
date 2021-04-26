@@ -15,6 +15,9 @@
 		table {
 			border-collapse:collapse;
 		}
+		.ml-8 {
+			margin-left: 8px;
+		}
 
 		/* .table ここから */
 		.table thead tr {
@@ -56,7 +59,7 @@
 </head>
 <body>
 	<div id="vue">
-		<h4>コスパ計算</h4>
+		<h4 class="ml-8">コスパ計算</h4>
 		<div class="table">
 			<table>
 				<thead>
@@ -126,7 +129,7 @@
 				</tr>
 			</table>
 		</div>
-		<div class="message">
+		<div class="message ml-8">
 			<p>最終保存日時：{{ saveDate }}</p>
 		</div>
 
@@ -174,7 +177,7 @@
 		</div>
 
 		<br><br>
-		<p style="font-size: small;">Last Update: {{ lastModified }}</p>
+		<p style="font-size: small;" class="ml-8">Last Update: {{ lastModified }}</p>
 	</div>
 	<script>
 	let vue = new Vue({
