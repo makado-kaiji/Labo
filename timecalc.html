@@ -10,130 +10,11 @@
 	<title>汎用時刻計算</title>
 	<meta name="viewport" content="width=device-width">
 	<script type="text/javascript" src="menu.js"></script>
-
-<script type="text/javascript">
-// 回復基準量
-var baseTime = 0;
-// タイマーセット用
-var timerSet = 0;
-var timer;
-
-// test
-
-// Document Ready
-$(function() {
-	// 基準値セット
-	baseTime = Number($("#numBaseTime").val());
-
-	// 現在時刻表示
-	var nowDateTime = setInterval(function () {$("#nowDateTime").html(new Date());}, 1000);
-
-	// 回復基準アウトフォーカスイベント
-	$("#numBaseTime").on("blur",function(){
-		baseTime = Number($(this).val());
-	});
-
-	// 回復量から変換
-	$(".numTargetValue").on("keypress", function(e) { if (e.which == 13) {calcFromKaihukuryo();} });
-	$("#btnTargetValue").on("click",function(){ calcFromKaihukuryo(); });
-	function calcFromKaihukuryo(){
-		clearInterval(timer);
-		var ret = Number($(".numTargetValue").val()) * baseTime;
-		var hour = Math.floor(ret / 60);
-		var min = ret % 60;
-		var setDate = new Date();
-		setDate.setMinutes(setDate.getMinutes() + ret);
-		dispResult(null, hour, min, setDate.getHours(), setDate.getMinutes());
-		// タイマー準備
-		timerSet = (hour * 60 + min) * 60;
-		dispTimer();
-	}
-
-	// 所要時間から変換
-	$(".numRequiredTime").on("keypress", function(e) { if (e.which == 13) {calcFromSyoyoJikan();} });
-	$("#btnRequiredTime").on("click",function(){ calcFromSyoyoJikan(); });
-	function calcFromSyoyoJikan(){
-		clearInterval(timer);
-		var hour = Number($(".numRequiredTime.hour").val());
-		var min = Number($(".numRequiredTime.min").val());
-		var ret = Math.floor((hour * 60 + min) / baseTime);
-		var setDate = new Date();
-		setDate.setMinutes(setDate.getMinutes() + hour * 60 + min);
-		dispResult(ret, null, null, setDate.getHours(), setDate.getMinutes());
-		// タイマー準備
-		timerSet = (hour * 60 + min) * 60;
-		dispTimer();
-	}
-
-	// 到達時刻から変換
-	$(".numTargetTime").on("keypress", function(e) { if (e.which == 13) {calcFromToutatuJikoku();} });
-	$("#btnTargetTime").on("click",function(){ calcFromToutatuJikoku(); });
-	function calcFromToutatuJikoku(){
-		clearInterval(timer);
-		var addHour = Number($(".numTargetTime.hour").val());
-		var addMin = Number($(".numTargetTime.min").val());
-
-		var nowDate = new Date();
-		var tgtDate;
-		if (nowDate.getHours() * 60 + nowDate.getMinutes() < addHour * 60 + addMin) {
-			// 日付変更なし
-			tgtDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), addHour, addMin);
-		} else {
-			// 日付変更あり
-			tgtDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate() + 1, addHour, addMin);
+	<style>
+		#fc2_qr_code_header,#fc2_footer {
+			display: none;
 		}
-		var min = Math.floor((tgtDate - nowDate) / 60000);
-		dispResult(Math.floor(min / baseTime), Math.floor(min / 60), min % 60, null, null);
-		// タイマー準備
-		timerSet = min * 60;
-		dispTimer();
-	}
-
-	// タイマースタート　※setIntervalもやりたい
-	$("#btnStartTimer").on("click", function(e) {
-		if (timerSet > 0) {
-			console.log("タイマースタート：" + new Date());
-			timer = setInterval(function(){
-				timerSet -= 1;
-				dispTimer();
-				if(timerSet == 0) {
-					clearInterval(timer);
-					alert("完了");
-				}
-			}, 1000);
-		}
-	});
-});
-
-// 計算結果表示
-function dispResult(ret, hour, min , addHour, addMin) {
-	// 回復量
-	if (ret != null) $(".numTargetValue").val(ret);
-
-	// 所要時間
-	if (hour != null) $(".numRequiredTime.hour").val(hour);
-	if (min != null) $(".numRequiredTime.min").val(min);
-
-	// 到達時刻
-	if (addHour != null)$(".numTargetTime.hour").val(addHour);
-	if (addMin != null)$(".numTargetTime.min").val(addMin);
-}
-
-// タイマー用時刻表示
-function dispTimer() {
-	var dispTime = timerSet;
-	var sec = dispTime % 60;
-	var min = Math.floor(dispTime / 60);
-	var hour = Math.floor(min / 60);
-	min = min - hour * 60;
-	$("#timerResult").html("あと " + hour + "時間" + min + "分" + sec + "秒");
-}
-</script>
-<style>
-	#fc2_qr_code_header,#fc2_footer {
-		display: none;
-	}
-</style>
+	</style>
 
 </head>
 
@@ -178,7 +59,127 @@ function dispTimer() {
 	<span id="timerResult"></span>
 </div>
 
-<p style="font-size: small; position:absolute; bottom: 0px;">Last Update: 2016/03/03</p>
+<p style="font-size: small; position:absolute; bottom: 0px;" class="lastModified"></p>
+
+<script type="text/javascript">
+	// 回復基準量
+	var baseTime = 0;
+	// タイマーセット用
+	var timerSet = 0;
+	var timer;
+
+	// 画面に更新日時を反映
+	$('.lastModified').html((new Date(document.lastModified)).toLocaleString());
+
+	// Document Ready
+	$(function () {
+		// 基準値セット
+		baseTime = Number($("#numBaseTime").val());
+
+		// 現在時刻表示
+		var nowDateTime = setInterval(function () { $("#nowDateTime").html(new Date()); }, 1000);
+
+		// 回復基準アウトフォーカスイベント
+		$("#numBaseTime").on("blur", function () {
+			baseTime = Number($(this).val());
+		});
+
+		// 回復量から変換
+		$(".numTargetValue").on("keypress", function (e) { if (e.which == 13) { calcFromKaihukuryo(); } });
+		$("#btnTargetValue").on("click", function () { calcFromKaihukuryo(); });
+		function calcFromKaihukuryo() {
+			clearInterval(timer);
+			var ret = Number($(".numTargetValue").val()) * baseTime;
+			var hour = Math.floor(ret / 60);
+			var min = ret % 60;
+			var setDate = new Date();
+			setDate.setMinutes(setDate.getMinutes() + ret);
+			dispResult(null, hour, min, setDate.getHours(), setDate.getMinutes());
+			// タイマー準備
+			timerSet = (hour * 60 + min) * 60;
+			dispTimer();
+		}
+
+		// 所要時間から変換
+		$(".numRequiredTime").on("keypress", function (e) { if (e.which == 13) { calcFromSyoyoJikan(); } });
+		$("#btnRequiredTime").on("click", function () { calcFromSyoyoJikan(); });
+		function calcFromSyoyoJikan() {
+			clearInterval(timer);
+			var hour = Number($(".numRequiredTime.hour").val());
+			var min = Number($(".numRequiredTime.min").val());
+			var ret = Math.floor((hour * 60 + min) / baseTime);
+			var setDate = new Date();
+			setDate.setMinutes(setDate.getMinutes() + hour * 60 + min);
+			dispResult(ret, null, null, setDate.getHours(), setDate.getMinutes());
+			// タイマー準備
+			timerSet = (hour * 60 + min) * 60;
+			dispTimer();
+		}
+
+		// 到達時刻から変換
+		$(".numTargetTime").on("keypress", function (e) { if (e.which == 13) { calcFromToutatuJikoku(); } });
+		$("#btnTargetTime").on("click", function () { calcFromToutatuJikoku(); });
+		function calcFromToutatuJikoku() {
+			clearInterval(timer);
+			var addHour = Number($(".numTargetTime.hour").val());
+			var addMin = Number($(".numTargetTime.min").val());
+
+			var nowDate = new Date();
+			var tgtDate;
+			if (nowDate.getHours() * 60 + nowDate.getMinutes() < addHour * 60 + addMin) {
+				// 日付変更なし
+				tgtDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), addHour, addMin);
+			} else {
+				// 日付変更あり
+				tgtDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate() + 1, addHour, addMin);
+			}
+			var min = Math.floor((tgtDate - nowDate) / 60000);
+			dispResult(Math.floor(min / baseTime), Math.floor(min / 60), min % 60, null, null);
+			// タイマー準備
+			timerSet = min * 60;
+			dispTimer();
+		}
+
+		// タイマースタート　※setIntervalもやりたい
+		$("#btnStartTimer").on("click", function (e) {
+			if (timerSet > 0) {
+				console.log("タイマースタート：" + new Date());
+				timer = setInterval(function () {
+					timerSet -= 1;
+					dispTimer();
+					if (timerSet == 0) {
+						clearInterval(timer);
+						alert("完了");
+					}
+				}, 1000);
+			}
+		});
+	});
+
+	// 計算結果表示
+	function dispResult(ret, hour, min, addHour, addMin) {
+		// 回復量
+		if (ret != null) $(".numTargetValue").val(ret);
+
+		// 所要時間
+		if (hour != null) $(".numRequiredTime.hour").val(hour);
+		if (min != null) $(".numRequiredTime.min").val(min);
+
+		// 到達時刻
+		if (addHour != null) $(".numTargetTime.hour").val(addHour);
+		if (addMin != null) $(".numTargetTime.min").val(addMin);
+	}
+
+	// タイマー用時刻表示
+	function dispTimer() {
+		var dispTime = timerSet;
+		var sec = dispTime % 60;
+		var min = Math.floor(dispTime / 60);
+		var hour = Math.floor(min / 60);
+		min = min - hour * 60;
+		$("#timerResult").html("あと " + hour + "時間" + min + "分" + sec + "秒");
+	}
+</script>
 
 </body>
 </html>
