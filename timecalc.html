@@ -85,7 +85,7 @@ $(function() {
 		var min = Math.floor((tgtDate - nowDate) / 60000);
 		dispResult(Math.floor(min / baseTime), Math.floor(min / 60), min % 60, null, null);
 		// タイマー準備
-		timerSet = (addHour * 60 + addMin) * 60;
+		timerSet = min * 60;
 		dispTimer();
 	}
 
