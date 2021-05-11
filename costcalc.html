@@ -83,7 +83,7 @@
 							</td>
 							<td style="position: relative;">
 								<!-- 小数点第3位で切捨 -->
-								{{ item.amount && item.count ? Math.floor((item.amount / item.count) * 1000) / 1000 : null }}
+								{{ item.amount && item.count ? Math.floor((item.amount / item.count) * 1000) / 1000 : '&nbsp;' }}
 
 								<!-- 他と比較 -->
 								<button v-on:click="calcCompare(itemIndex)" style="position: absolute; right: 0;">?</button>
@@ -92,19 +92,20 @@
 
 						<!-- メモ・ボタン行 -->
 						<tr v-bind:key="`item-2-${itemIndex}`" v-bind:data-item_id="`button-${itemIndex + 1}`">
-							<td v-bind:colspan="items.length > 1 ? 2 : 3">
+							<td v-bind:colspan="2">
 								<input type="text" v-model="item.memo" placeholder="メモ" class="memo">
 							</td>
-							<td v-if="items.length > 1">
+							<td>
 								<button
 									v-on:click="upRow(itemIndex)"
-									v-bind:style="`opacity: ${itemIndex !== 0 ? 1 : 0};`"
+									v-bind:style="`opacity: ${itemIndex > 0 ? 1 : 0};`"
 									v-bind:disabled="itemIndex === 0"> ↑ </button>
 								<button
 									v-on:click="downRow(itemIndex)"
 									v-bind:style="`opacity: ${itemIndex !== items.length - 1 ? 1 : 0};`"
 									v-bind:disabled="itemIndex === items.length - 1"> ↓ </button>
-								<button v-on:click="deleteRow(itemIndex)">－</button>
+								<button v-on:click="deleteRow(itemIndex)"
+									v-bind:style="`opacity: ${items.length > 1 ? 1 : 0}`">－</button>
 							</td>
 						</tr>
 
@@ -232,6 +233,9 @@
 
 			/** 上の行と入替 */
 			upRow(itemIndex) {
+				// 1行以下なら何もしない
+				if (this.items.length < 2) return
+
 				const temp = this.items[itemIndex];
 				this.items.splice(itemIndex, 1)
 				this.items.splice(itemIndex - 1, 0, temp)
@@ -239,6 +243,9 @@
 			
 			/** 下の行と入替 */
 			downRow(itemIndex) {
+				// 1行以下なら何もしない
+				if (this.items.length < 2) return
+				
 				const temp = this.items[itemIndex];
 				this.items.splice(itemIndex, 1)
 				this.items.splice(itemIndex + 1, 0, temp)
@@ -246,6 +253,9 @@
 			
 			/** 行削除 */
 			deleteRow (itemIndex) {
+				// 1行以下なら何もしない
+				if (this.items.length < 2) return
+				
 				const result = confirm('本当に削除する？')
 				if (result) {
 					this.items.splice(itemIndex, 1)
