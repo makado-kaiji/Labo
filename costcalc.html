@@ -103,7 +103,7 @@
 								<button
 									v-on:click="downRow(itemIndex)"
 									v-bind:style="`opacity: ${itemIndex !== items.length - 1 ? 1 : 0};`"
-									v-bind:disabled="itemIndex === items.length - 1"> ↓ </button>
+									v-bind:disabled="itemIndex === items.length - 1"> ↓ </button> 
 								<button v-on:click="deleteRow(itemIndex)"
 									v-bind:style="`opacity: ${items.length > 1 ? 1 : 0}`">－</button>
 							</td>
@@ -193,8 +193,22 @@
 		</div>
 
 		<br><br>
+
+		<!-- インポート -->
+		<div style="padding: 5px;">
+			<textarea style="width: calc(100% - 10px);" rows="5" v-model="importValue"></textarea>
+			<br>
+			<button v-on:click="importJSON()">インポート</button>
+		</div>
+
+		<br><br>
+
+		<!-- 最終更新日時 -->
 		<p style="font-size: small;" class="ml-8">Last Update: {{ lastModified }}</p>
 		<br>
+
+		<!-- コピペエリア（コピー中のみ一時的に非表示） -->
+		<div v-if="exportValue" id="copyArea">{{ exportValue }}</div>
 	</div>
 	<script>
 	let vue = new Vue({
@@ -210,6 +224,8 @@
 			saveDate: null,
 			calc: '0', // 電卓用文字列
 			lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
+			exportValue: '', // エクスポート用JSON
+			importValue: '', // インポート用JSON
 		},
 		mounted() {
 			// localStorageにあれば採用、無ければ空1行表示
@@ -326,6 +342,50 @@
 				this.saveDate = (new Date()).toLocaleString()
 				localStorage.items = JSON.stringify(this.items)
 				localStorage.saveDate = JSON.stringify(this.saveDate)
+
+				// 保存後にコピー
+				this.copyJSON()
+			},
+
+			/** JSONコピー */
+			copyJSON () {
+				// 既に画面内に選択があった場合を考慮して解除
+				window.getSelection().removeAllRanges();
+
+				// コピー用文字列
+				this.exportValue = localStorage.items;
+
+				// vueが画面上に反映するまで少し待つ
+				setTimeout(() => {
+					// 選択
+					var range = document.createRange();
+					range.selectNode(document.querySelector("#copyArea"));
+					window.getSelection().addRange(range);
+
+					// コピー
+					var result = document.execCommand("copy");
+
+					// 選択範囲を解除
+					window.getSelection().removeAllRanges();
+
+					// element.parentNode.removeChild(element);
+
+					console.log("copy: " + result); console.log(this.exportValue);
+
+					// コピー用文字列をクリア
+					this.exportValue = ''
+					
+				}, 500);
+
+			},
+
+			/** JSONインポート */
+			importJSON () {
+				// 未入力なら何もしない
+				if (!this.importValue) return;
+
+				const jsonObj = JSON.parse(this.importValue)
+				this.items = jsonObj
 			},
 
 			/** キャッシュを無視して再読込 */
