@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Optional chaining</title>
+</head>
+<body>
+	<p><a href="https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Optional_chaining">Optional chaining (?.) - JavaScript | MDN</a></p>
+	<p>
+		<pre>
+if (hoge != null)
+hoge.DoMethod();
+
+的なnullチェックが、実は
+
+hoge?.DoMethod();
+
+と短縮して書けたことを今更学んだ。ほげ。</pre>
+	</p>
+
+	<p class="dog_name"></p>
+	<p class="cat_name"></p>
+	<p class="some_method"></p>
+
+	<script>
+		const adventurer = {
+			name: 'Alice',
+			cat: {
+				name: 'Dinah'
+			}
+		};
+
+		const dogName = adventurer.dog?.name;
+		const catName = adventurer.cat?.name;
+		document.querySelector('.dog_name').innerHTML = dogName;
+		document.querySelector('.cat_name').innerHTML = catName;
+		// console.log(dogName);
+		// expected output: undefined
+
+		document.querySelector('.some_method').innerHTML = adventurer.someNonExistentMethod?.();
+		console.log(adventurer.someNonExistentMethod?.());
+		// expected output: undefined
+
+	</script>
+</body>
+</html>
