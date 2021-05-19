@@ -59,7 +59,7 @@
 </head>
 <body>
 	<div id="vue">
-		<h4 class="ml-8">コスパ計算</h4>
+		<h4 class="ml-8">コスパ計算　<span style="font-size: x-small;font-weight: normal;">コスパ値が少ない方がお得！</span></h4>
 		<div class="table">
 			<table>
 				<thead>
@@ -82,8 +82,7 @@
 								<input type="tel" v-model="item.count" placeholder="個数">
 							</td>
 							<td style="position: relative;">
-								<!-- 小数点第3位で切捨 -->
-								{{ item.amount && item.count ? Math.floor((item.amount / item.count) * 1000) / 1000 : '&nbsp;' }}
+								{{ calcCospa(item.amount, item.count) }}
 
 								<!-- 他と比較 -->
 								<button v-on:click="calcCompare(itemIndex)" style="position: absolute; right: 0;">?</button>
@@ -137,16 +136,24 @@
 			<p>最終保存日時：{{ saveDate }}</p>
 		</div>
 
-		<!-- <div v-if="compareResult.isShow"> -->
-		<div v-if="false">
-			<!-- TODO: [三] ここのオブジェクトをdataに追加と計算結果反映 -->
-			基準：{{ compareResult.now.index + 1 }}行 / 指定{{ compareResult.target.index + 1 }}行
+		<div class="ml-8" v-if="compareResult.isShow">
+			基準：{{ compareResult.now + 1 }}行 / 指定：{{ compareResult.target + 1 }}行
 			<br>
-			{{ compareResult.mode === 1 ? '金額' : '個数' }}合わせ
+			基準：{{ items[compareResult.now].amount }}円 / {{ items[compareResult.now].count }}個 / {{ calcCospa(items[compareResult.now].amount, items[compareResult.now].count) }}
 			<br>
-			基準：{{ items[compareResult.now.index].amount }}円 / {{ items[compareResult.now.index].count }}個 / {{ items[compareResult.now.index].amount && items[compareResult.now.index].count ? Math.floor((items[compareResult.now.index].amount / items[compareResult.now.index].count) * 1000) / 1000 : null }}
-			<br>
-			指定：{{ compareResult.target.amount }}円 / {{ compareResult.target.count }}個 / {{ compareResult.target.cost }}
+			指定：{{ items[compareResult.target].amount }}円 / {{ items[compareResult.target].count }}個
+			<br>↓
+			<template v-if="compareResult.mode === 1">
+				金額合わせ
+				<br>
+				{{ items[compareResult.now].amount }}円 なら
+				{{ compareResult.result }} 個
+			</template>
+			<template v-if="compareResult.mode === 2">
+				個数合わせ
+				<br>
+				{{ items[compareResult.now].count }}個 なら {{ compareResult.result }} 円
+			</template>
 		</div>
 
 		<br>
@@ -226,6 +233,15 @@
 			lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
 			exportValue: '', // エクスポート用JSON
 			importValue: '', // インポート用JSON
+
+			// 金額合わせ or 値段合わせ
+			compareResult: {
+				isShow: false, // 表示フラグ
+				mode: null, // 1:金額合わせ / 2:値段合わせ
+				now:null, // 現在の行index
+				target: null, // 比較対象の行index
+				result: null, // 計算結果
+			},
 		},
 		mounted() {
 			// localStorageにあれば採用、無ければ空1行表示
@@ -239,6 +255,13 @@
 			}
 		},
 		methods: {
+			// コスパ計算(小数点第3位で切捨)
+			calcCospa(amount, count){
+				return amount && count
+					? Math.floor((amount / count) * 1000) / 1000
+					: '&nbsp;'
+			},
+
 			/** 行追加 */
 			addRow () {
 				this.items.push({
@@ -280,8 +303,12 @@
 
 			/** 基準値比較 */
 			calcCompare (itemIndex) {
+				// 一旦非表示
+				this.compareResult.isShow = false
+
 				// 現在の行を取得
-				const nowRow = this.items[itemIndex]
+				this.compareResult.now = itemIndex
+				const nowRow = this.items[this.compareResult.now]
 
 				let mode = prompt('1: 金額合わせ / 2:個数合わせ')
 
@@ -296,6 +323,7 @@
 					alert('1か2しか入力しちゃダメ！')
 					return
 				}
+				this.compareResult.mode = mode // チェックOK
 
 				let target = prompt('何行目と？')
 
@@ -309,17 +337,25 @@
 				} else if (target < 1 || this.items.length < target) {
 					alert('存在しない行番号を入力しちゃダメ！')
 				}
+				this.compareResult.target = target - 1 // チェックOK
 
 				// 指定の行番号データを取得
-				const targetRow = this.items[target - 1]
+				const targetRow = this.items[this.compareResult.target]
 				const targetCost = Math.floor((targetRow.amount / targetRow.count) * 1000) / 1000
-				if (mode === 1) {
+				let calc = -1;
+				if (this.compareResult.mode === 1) {
 					// 1:金額合わせ→基準行の値段 ÷ 指定行のコスパ
-					const calc = nowRow.amount / targetCost
-				} else if (mode === 2) {
+					calc = nowRow.amount / targetCost
+				} else if (this.compareResult.mode === 2) {
 					// 2:個数合わせ→基準行の個数 × 指定行のコスパ
-					const calc = nowRow.count * targetCost
+					calc = nowRow.count * targetCost
 				}
+
+				// 計算結果を反映(小数点第3位で切捨)
+				this.compareResult.result = Math.floor(calc * 1000) / 1000
+
+				// 表示
+				this.compareResult.isShow = true
 			},
 
 			/** 【全角数字変換】
