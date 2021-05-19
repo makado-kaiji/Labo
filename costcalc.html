@@ -59,7 +59,7 @@
 </head>
 <body>
 	<div id="vue">
-		<h4 class="ml-8">コスパ計算　<span style="font-size: x-small;font-weight: normal;">コスパ値が少ない方がお得！</span></h4>
+		<h4 class="ml-8">コスパ計算　<span style="font-size: x-small;font-weight: normal;vertical-align: middle;">コスパ値が少ない方がお得！</span></h4>
 		<div class="table">
 			<table>
 				<thead>
@@ -259,7 +259,7 @@
 			calcCospa(amount, count){
 				return amount && count
 					? Math.floor((amount / count) * 1000) / 1000
-					: '&nbsp;'
+					: '　' // vue上で計算していた頃は「'&nbsp;'」だったが、メソッドでやると文字列として表示されてしまう
 			},
 
 			/** 行追加 */
@@ -336,11 +336,19 @@
 					return
 				} else if (target < 1 || this.items.length < target) {
 					alert('存在しない行番号を入力しちゃダメ！')
+					return
+				} else if (target === this.compareResult.now + 1) {
+					alert('自分自身は比較できないよ！')
+					return
 				}
 				this.compareResult.target = target - 1 // チェックOK
 
 				// 指定の行番号データを取得
 				const targetRow = this.items[this.compareResult.target]
+				if (!targetRow.cost || !targetRow.amount) {
+					alert('対象行に入力が無いよ！')
+					return
+				}
 				const targetCost = Math.floor((targetRow.amount / targetRow.count) * 1000) / 1000
 				let calc = -1;
 				if (this.compareResult.mode === 1) {
