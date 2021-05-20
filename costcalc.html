@@ -84,12 +84,12 @@
 							<td style="position: relative;">
 								{{ calcCospa(item.amount, item.count) }}
 
-								<!-- 他と比較：全部で１行しか無いときは表示しない -->
+								<!-- 他と比較：全部で１行しか無い or 自分の行に入力が無い時は表示しない -->
 								<button
 									v-on:click="calcCompare(itemIndex)"
 									style="position: absolute; right: 0;"
-									v-bind:style="`opacity: ${items.length > 1 ? 1 : 0};`"
-									v-bind:disabled="items.length < 2"
+									v-bind:style="`opacity: ${items.length < 2 || (!item.amount || !item.count) ? 0 : 1};`"
+									v-bind:disabled="items.length < 2 || (!item.amount || !item.count)"
 								>?</button>
 							</td>
 						</tr>
@@ -351,7 +351,7 @@
 				// 指定の行番号データを取得
 				const targetRow = this.items[this.compareResult.target]
 				if (!targetRow.cost || !targetRow.amount) {
-					alert('対象行に入力が無いよ！')
+					alert('指定行に入力が無いよ！')
 					return
 				}
 				const targetCost = Math.floor((targetRow.amount / targetRow.count) * 1000) / 1000
