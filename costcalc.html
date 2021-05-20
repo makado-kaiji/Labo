@@ -419,7 +419,10 @@
 
 					// element.parentNode.removeChild(element);
 
-					console.log("copy: " + result); console.log(this.exportValue);
+					// TODO: 2行のとき、2行目のmemoがnullでコピペされない。無い。
+
+					console.log("copy: " + result);
+					console.log(this.exportValue);
 
 					// コピー用文字列をクリア
 					this.exportValue = ''
