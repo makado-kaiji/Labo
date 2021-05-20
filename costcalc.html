@@ -84,9 +84,13 @@
 							<td style="position: relative;">
 								{{ calcCospa(item.amount, item.count) }}
 
-								<!-- 他と比較 -->
-								<!-- TODO: 全部で１行しか無いときは「？」ボタンを表示しない -->
-								<button v-on:click="calcCompare(itemIndex)" style="position: absolute; right: 0;">?</button>
+								<!-- 他と比較：全部で１行しか無いときは表示しない -->
+								<button
+									v-on:click="calcCompare(itemIndex)"
+									style="position: absolute; right: 0;"
+									v-bind:style="`opacity: ${items.length > 1 ? 1 : 0};`"
+									v-bind:disabled="items.length < 2"
+								>?</button>
 							</td>
 						</tr>
 
