@@ -53,6 +53,11 @@
 		.calculator td input[type="button"] {
 			font-size: 1em;
 			touch-action: manipulation;
+
+			/* iPhoneでボタンの角丸化を防ぐ
+			https://www.webdlab.com/labs/ios-button/ */
+			-webkit-appearance: none;
+			border-radius: 0;
 		}
 		/* .calculator ここまで */
 	</style>
