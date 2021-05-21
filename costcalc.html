@@ -64,6 +64,7 @@
 			<table>
 				<thead>
 					<tr>
+						<th>&nbsp;</th>
 						<th>金額</th>
 						<th>個数</th>
 						<th>個/円</th><!-- 安い方が得 -->
@@ -75,6 +76,7 @@
 
 						<!-- エディタ行 -->
 						<tr v-bind:key="`item-1-${itemIndex}`" v-bind:data-item_id="`data-${itemIndex + 1}`">
+							<td style="margin: 0;padding: 0;">{{itemIndex+1}}</td>
 							<td>
 								<input type="tel" v-model="item.amount" placeholder="金額">
 							</td>
@@ -96,6 +98,7 @@
 
 						<!-- メモ・ボタン行 -->
 						<tr v-bind:key="`item-2-${itemIndex}`" v-bind:data-item_id="`button-${itemIndex + 1}`">
+							<td style="margin: 0;padding: 0;opacity: 0;">{{itemIndex+1}}</td>
 							<td v-bind:colspan="2">
 								<input type="text" v-model="item.memo" placeholder="メモ" class="memo">
 							</td>
