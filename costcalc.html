@@ -419,7 +419,7 @@
 
 					// element.parentNode.removeChild(element);
 
-					// TODO: 2行のとき、2行目のmemoがnullでコピペされない。無い。
+					// HACK: 末尾行のmemoがnullだと、memoが欠落した状態でコピーされる。インポートしてもエラーにならないので放置
 
 					console.log("copy: " + result);
 					console.log(this.exportValue);
