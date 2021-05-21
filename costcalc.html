@@ -142,11 +142,9 @@
 		</div>
 
 		<div class="ml-8" v-if="compareResult.isShow">
-			基準：{{ compareResult.now + 1 }}行 / 指定：{{ compareResult.target + 1 }}行
+			基準：[{{ compareResult.now + 1 }}] {{ items[compareResult.now].amount }}円 / {{ items[compareResult.now].count }}個 / {{ calcCospa(items[compareResult.now].amount, items[compareResult.now].count) }}
 			<br>
-			基準：{{ items[compareResult.now].amount }}円 / {{ items[compareResult.now].count }}個 / {{ calcCospa(items[compareResult.now].amount, items[compareResult.now].count) }}
-			<br>
-			指定：{{ items[compareResult.target].amount }}円 / {{ items[compareResult.target].count }}個
+			指定：[{{ compareResult.target + 1 }}] {{ items[compareResult.target].amount }}円 / {{ items[compareResult.target].count }}個
 			<br>↓
 			<template v-if="compareResult.mode === 1">
 				金額合わせ
