@@ -555,7 +555,13 @@
 
 			/** 電卓入力 */
 			calcInput(event) {
-				// 初期値0 かつ 入力値が「.」でないなら上書き、それ以外なら追加していく
+				// 初期値0 かつ 入力値が「/」→ゼロ除算になるため終了
+				if (this.calc === '0' && event.target.value == '/') {
+					return;
+				}
+				// TODO: ただしこの対応だけだと「0./3」は通ってしまう。が、計算結果は「0」になるので一応セーフ
+
+				// 初期値0 かつ 入力値が「.」「/」でないなら上書き、それ以外なら追加していく
 				this.calc = this.calc === '0' && event.target.value !== '.'
 									? event.target.value
 									: this.calc + event.target.value
@@ -563,7 +569,7 @@
 
 			/** 電卓計算結果反映 */
 			calcExec () {
-				// TODO: ゼロ除算対策
+				console.log(`this.calc = ${this.calc}`)
 
 				// 文字列として保持していた計算を実行
 				// https://techacademy.jp/magazine/21139
