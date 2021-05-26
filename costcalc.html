@@ -540,7 +540,8 @@
 
 			/** キャッシュを無視して再読込 */
 			clearCash () {
-				// TODO: やる前に「保存した？」を聞いても良いかも
+				// 保存した？
+				if (!confirm('画面を再読み込みします。\r\n※保存していない内容はリセットされます')) return;
 
 				// 既にQueryが付いていた場合は削除
 				let url = location.href.replace(location.search, '')
@@ -555,11 +556,10 @@
 
 			/** 電卓入力 */
 			calcInput(event) {
-				// 初期値0 かつ 入力値が「/」→ゼロ除算になるため終了
-				if (this.calc === '0' && event.target.value == '/') {
+				// ゼロ除算対策：それまで入力されている文字に「0」「.」以外が含まれていればOK
+				if (!this.calc.split('0').join('').split('.').join('').length > 0 && event.target.value == '/') {
 					return;
 				}
-				// TODO: ただしこの対応だけだと「0./3」は通ってしまう。が、計算結果は「0」になるので一応セーフ
 
 				// 初期値0 かつ 入力値が「.」「/」でないなら上書き、それ以外なら追加していく
 				this.calc = this.calc === '0' && event.target.value !== '.'
