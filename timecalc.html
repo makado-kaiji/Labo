@@ -96,6 +96,7 @@
 		// 回復基準をリストから選ぶ
 		$('#timePattern').on('change', function (e) {
 			$("#numBaseTime").val($(this).val());
+			baseTime = Number($(this).val());
 		})
 
 		// 回復基準アウトフォーカスイベント
