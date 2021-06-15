@@ -20,13 +20,21 @@
 	<span>回復基準：</span>
 	<input type="number" id="numBaseTime" max="99" min="0" value="5">
 	<span>分／1回復</span>
-	<!-- TODO 今の手入力もそのまま残しつつ、候補リストから選ばせて入力するモードが欲しい
+	<!--
+		今の手入力もそのまま残しつつ、候補リストから選ばせて入力する
 		・デレステ→5分1回復、1単位使用
 		・デレステ(営業)→15分1回復→10Hなら40単位使用
 		・ツイステ→15分1回復、1単位使用
 		・ウマ娘(育成TP)→10分1回復→30単位使用100MAX→16:40必要
 		・ウマ娘(レースRP)→120分1回復→5MAX→10:00必要
-	 -->
+	-->
+	<select name="" id="timePattern">
+		<option value="5">デレステ</option>
+		<option value="15">デレステ(営業)</option>
+		<option value="10">ウマ娘(育成TP)</option>
+		<option value="120">ウマ娘(レースRP)</option>
+		<option value="15">ツイステ</option>
+	</select>
 </div>
 
 <div>
@@ -83,7 +91,12 @@
 		baseTime = Number($("#numBaseTime").val());
 
 		// 現在時刻表示
-		var nowDateTime = setInterval(function () { $("#nowDateTime").html(new Date()); }, 1000);
+		var nowDateTime = setInterval(function () { $("#nowDateTime").html((new Date()).toLocaleString()); }, 1000);
+
+		// 回復基準をリストから選ぶ
+		$('#timePattern').on('change', function (e) {
+			$("#numBaseTime").val($(this).val());
+		})
 
 		// 回復基準アウトフォーカスイベント
 		$("#numBaseTime").on("blur", function () {
