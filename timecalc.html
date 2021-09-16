@@ -17,18 +17,15 @@
 <h4>汎用時刻計算</h4>
 <span id="nowDateTime">&nbsp;</span>
 <div>
-	<span>回復基準：</span>
-	<input type="number" id="numBaseTime" max="99" min="0" value="5">
-	<span>分／1回復</span>
+	<span>回復種別：</span>
 	<!--
 		今の手入力もそのまま残しつつ、候補リストから選ばせて入力する
 		・デレステ→5分1回復、1単位使用
 		・デレステ(営業)→15分1回復→10Hなら40単位使用
-		・ツイステ→15分1回復、1単位使用
 		・ウマ娘(育成TP)→10分1回復→30単位使用100MAX→16:40必要
 		・ウマ娘(レースRP)→120分1回復→5MAX→10:00必要
+		・ツイステ→15分1回復、1単位使用
 	-->
-	<!-- TODO: 各リスト選択後に消費量の凡例を表示する（例：営業なら10H,6H） -->
 	<select name="" id="timePattern">
 		<option value="5">デレステ</option>
 		<option value="15">デレステ(営業)</option>
@@ -36,6 +33,20 @@
 		<option value="120">ウマ娘(レースRP)</option>
 		<option value="15">ツイステ</option>
 	</select>
+
+	<!-- 使用凡例：timePatternの選択に依存する -->
+	<select id="usePattern">
+		<!-- 初回は「デレステ」 -->
+		<option value="">(未選択)</option>
+		<option value="15">MASTER</option>
+		<option value="12">PRO</option>
+	</select>
+</div>
+
+<div>
+	<span>回復基準：</span>
+	<input type="number" id="numBaseTime" max="99" min="0" value="5">
+	<span>分／1回復</span>
 </div>
 
 <div>
@@ -96,9 +107,93 @@
 
 		// 回復基準をリストから選ぶ
 		$('#timePattern').on('change', function (e) {
-			$("#numBaseTime").val($(this).val());
-			baseTime = Number($(this).val());
-		})
+			const selectedPattern = $(this).val(); // 選択値
+
+			$("#numBaseTime").val(selectedPattern);
+			baseTime = Number(selectedPattern);
+
+			/*
+					今の手入力もそのまま残しつつ、候補リストから選ばせて入力する
+		・デレステ→5分1回復、1単位使用
+		・デレステ(営業)→15分1回復→10Hなら40単位使用
+		・ウマ娘(育成TP)→10分1回復→30単位使用100MAX→16:40必要
+		・ウマ娘(レースRP)→120分1回復→5MAX→10:00必要
+		・ツイステ→15分1回復、1単位使用
+*/
+			// 消費凡例を表示する
+			const options = []
+			switch ($('#timePattern :selected').html()) {
+				case 'デレステ':
+					options.push('MASTER,15')
+					options.push('PRO,12')
+					break
+				case 'デレステ(営業)':
+					options.push('10H,40')
+					options.push('6H,24')
+					break
+				case 'ウマ娘(育成TP)':
+					options.push('1回,30')
+					options.push('MAX,100')
+					break
+				case 'ウマ娘(レースRP)':
+					options.push('1回,1')
+					options.push('MAX,5')
+					break
+				case 'ツイステ':
+					options.push('MAX,10')
+					options.push('ﾏｽﾀｰｼｪﾌ20,20')
+					options.push('ﾏｽﾀｰｼｪﾌ60,60')
+					options.push('ﾏｽﾀｰｼｪﾌ150,150')
+					options.push('ﾏｽﾀｰｼｪﾌ360,360')
+					break
+				default:
+					break
+			}
+
+			const optionsHtml = [];
+			const optionTemp = '<option value="{value}">{name}</option>';
+
+			// 1件目に空を作る
+			optionsHtml.push(optionTemp.replace('{value}','').replace('{name}','(未選択)'));
+
+			// 作ったデータごとにoptionを作成
+			options.forEach((v,i)=>{
+				const name = v.split(',')[0];
+				const value = Number(v.split(',')[1]);
+				let calced = 0; // 最終的にoptionに採用する回復量
+
+				if (name.includes('ﾏｽﾀｰｼｪﾌ')) {
+					// ツイステ マスターシェフの場合のみ、係数ではなく数値を直接採用
+					calced = value;
+				} else {
+					// その他は回復量なので、選択中の種別に合わせて計算
+					calced = baseTime * value;
+				}
+				optionsHtml.push(optionTemp.replace('{value}', value).replace('{name}', name));
+			});
+
+			// 最後にまとめてDOM追加（ループで何度もセレクタを掴むとエラーになることがある）
+			$('#usePattern')
+				.html('')
+				.append(optionsHtml.join(''));
+		});
+
+		// 使用凡例選択イベント
+		$('#usePattern').on('change', function(){
+			// 選択した値を回復量に反映
+			$(".numTargetValue").val(Number($(this).val()));
+
+			if ($('#usePattern :selected').html().includes('ﾏｽﾀｰｼｪﾌ')) {
+				// マスターシェフの場合、回復基準は1分
+				$('#numBaseTime').val(1);
+				baseTime = 1;
+
+			} else {
+				// その他の場合は回復基準は現在選択中の値を反映する
+				$('#numBaseTime').val(Number($("#timePattern").val()));
+				baseTime = Number($("#timePattern").val());
+			}
+		});
 
 		// 回復基準アウトフォーカスイベント
 		$("#numBaseTime").on("blur", function () {
@@ -200,6 +295,7 @@
 		min = min - hour * 60;
 		$("#timerResult").html("あと " + hour + "時間" + min + "分" + sec + "秒");
 	}
+
 </script>
 
 </body>
