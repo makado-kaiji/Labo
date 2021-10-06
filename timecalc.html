@@ -10,6 +10,27 @@
 	<link rel="shortcut icon" href="img/favicon.ico">
 	<title>汎用時刻計算</title>
 
+	<style>
+		/* .calculator ここから */
+		.calculator table {
+			border: 1px solid #ccc;
+			margin: auto;
+			font-size: 1.5em;
+		}
+		.calculator .result {
+			border: 1px solid #ccc;
+			text-align: right;
+		}
+		.calculator td {
+			text-align: center;
+		}
+		.calculator td input[type="button"] {
+			font-size: 1em;
+			touch-action: manipulation;
+
+		}
+		/* .calculator ここまで */
+	</style>
 </head>
 
 <body>
@@ -82,11 +103,52 @@
 
 <div>
 	<br>
-	<textarea name="" id="memo" cols="30" rows="10"></textarea>
+	<textarea name="" id="memo" cols="30" rows="5" placeholder="メモ用"></textarea>
+</div>
+
+<!-- 電卓 -->
+<div class="calculator">
+	<table>
+		<tbody>
+			<tr>
+				<td colspan="4" class="result"></td>
+			</tr>
+			<tr>
+				<td><input type="button" value="C" onclick="calcInput('C')"></td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td><input type="button" value="/" onclick="calcInput('/')"></td>
+			</tr>
+			<tr>
+				<td><input type="button" value="7" onclick="calcInput('7')"></td>
+				<td><input type="button" value="8" onclick="calcInput('8')"></td>
+				<td><input type="button" value="9" onclick="calcInput('9')"></td>
+				<td><input type="button" value="*" onclick="calcInput('*')"></td>
+			</tr>
+			<tr>
+				<td><input type="button" value="4" onclick="calcInput('4')"></td>
+				<td><input type="button" value="5" onclick="calcInput('5')"></td>
+				<td><input type="button" value="6" onclick="calcInput('6')"></td>
+				<td><input type="button" value="-" onclick="calcInput('-')"></td>
+			</tr>
+			<tr>
+				<td><input type="button" value="1" onclick="calcInput('1')"></td>
+				<td><input type="button" value="2" onclick="calcInput('2')"></td>
+				<td><input type="button" value="3" onclick="calcInput('3')"></td>
+				<td><input type="button" value="+" onclick="calcInput('+')"></td>
+			</tr>
+			<tr>
+				<td><input type="button" value="0" onclick="calcInput('0')"></td>
+				<td>&nbsp;</td>
+				<td><input type="button" value="." onclick="calcInput('.')"></td>
+				<td><input type="button" value="=" onclick="calcExec('=')"></td>
+			</tr>
+		</tbody>
+	</table>
 </div>
 
 <!-- 最終更新日時 -->
-<p style="font-size: small; position:absolute; bottom: 0px;">Last Update: <span class="lastModified"></span></p>
+<p style="font-size: small;">Last Update: <span class="lastModified"></span></p>
 
 <script type="text/javascript">
 	// 回復基準量
@@ -296,6 +358,48 @@
 		min = min - hour * 60;
 		$("#timerResult").html("あと " + hour + "時間" + min + "分" + sec + "秒");
 	}
+
+	/** 電卓用文字列 */
+	var calc = '0';
+
+	/** 電卓入力 */
+	function calcInput(event) {
+		// クリア
+		if (event == 'C') {
+			calc = '0';
+			$('.calculator .result').html(calc);
+			return;
+		}
+
+		// ゼロ除算対策：それまで入力されている文字に「0」「.」以外が含まれていればOK
+		if (!calc.split('0').join('').split('.').join('').length > 0 && event == '/') {
+			return;
+		}
+
+		// 初期値0 かつ 入力値が「.」「/」でないなら上書き、それ以外なら追加していく
+		calc = calc === '0' && event !== '.'
+			? event
+			: calc + event;
+
+		$('.calculator .result').html(calc);
+	}
+
+	/** 電卓計算結果反映 */
+	function calcExec() {
+		console.log(`this.calc = ${calc}`)
+
+		// 文字列として保持していた計算を実行
+		// https://techacademy.jp/magazine/21139
+		calc = new Function("return " + calc)()
+
+		// 小数点4桁以下は切り捨て(切り捨て結果が違う場合のみ実行)
+		if (calc !== Math.floor(calc * 10000) / 10000) {
+			calc = (Math.floor(calc * 10000) / 10000).toString() + '...'
+		}
+
+		$('.calculator .result').html(calc);
+	}
+	$('.calculator .result').html(calc);
 
 </script>
 
