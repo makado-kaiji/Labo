@@ -357,6 +357,8 @@
 		var hour = Math.floor(min / 60);
 		min = min - hour * 60;
 		$("#timerResult").html("あと " + hour + "時間" + min + "分" + sec + "秒");
+
+		// TODO: ここで計算結果を表示した際、種別、回復量、到達時刻をコピー(出力？)できるボタンを作る→押したらtextareaに反映
 	}
 
 	/** 電卓用文字列 */
