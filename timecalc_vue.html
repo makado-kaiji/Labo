@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+	<title>汎用時刻計算</title>
+	<style>
+		/* 現在時刻 */
+		#nowDateTime {
+			font-size: x-small;
+			font-weight: normal;
+			vertical-align: middle;
+		}
+
+		/* .calculator ここから */
+		.calculator table {
+			border: 1px solid #ccc;
+			margin: auto;
+			font-size: 1.5em;
+		}
+		.calculator .result {
+			border: 1px solid #ccc;
+			text-align: right;
+		}
+		.calculator td {
+			text-align: center;
+		}
+		.calculator td input[type="button"] {
+			font-size: 1em;
+			touch-action: manipulation;
+		}
+		/* .calculator ここまで */
+	</style>
+</head>
+<body>
+	<div id="vue">
+		<h4>汎用時刻計算　<span id="nowDateTime">{{nowDateTime}}</span></h4>
+
+		<!-- 回復種別 -->
+		<div>
+			<span>回復種別：</span>
+			<!-- 種別 -->
+			<select
+				v-model="timePattern.selectIndex"
+				v-on:change="timePatternOnChange"
+			>
+				<option
+					v-for="(timePattern, timePatternIndex) in timePattern.list"
+					v-bind:key="`timePattern-${timePatternIndex}`"
+					:value="timePatternIndex"
+				>{{timePattern.name}}</option>
+			</select>
+
+			<!-- 凡例：選択した種別に応じて作成 -->
+			<select
+				v-if="timePattern.selectIndex != null && 0 <= timePattern.selectIndex && timePattern.selectIndex < timePattern.list.length"
+				v-model="timePattern.selectMode"
+				v-on:change="timePatternModeOnChange"
+			>
+				<option
+					v-for="(mode, modeIndex) in timePattern.list[timePattern.selectIndex].mode"
+					v-bind:key="`timePatternMode-${modeIndex}`"
+					:value="modeIndex"
+				>{{mode.name}}</option>
+			</select>
+		</div>
+
+		<!-- 回復基準 -->
+		<div>
+			<span>回復基準：</span>
+			<input type="number" v-model="numBaseTime" max="999" min="0">
+			<span>分／1回復</span>
+		</div>
+
+		<!-- 回復量 -->
+		<div>
+			<span>回復量　：</span>
+			<input type="number" v-model="numTargetValue" max="999" min="0" v-on:keypress="numTargetValueOnKeypress">
+			<input type="button" id="btnTargetValue" value="変換" v-on:click="calcFromKaihukuryo">
+		</div>
+
+		<!-- 所要時間 -->
+		<div>
+			<span>所要時間：</span>
+			<input type="number" v-model="numRequiredTimeHour" max="999" min="0" v-on:keypress="numRequiredTimeOnKeypress">
+			<span>時間</span>
+			<input type="number" v-model="numRequiredTimeMin" max="59" min="0" v-on:keypress="numRequiredTimeOnKeypress">
+			<span>分</span>
+			<input type="button" id="btnRequiredTime" value="変換" v-on:click="calcFromSyoyoJikan">
+		</div>
+		
+		<!-- 到達時刻 -->
+		<div>
+			<span>到達時刻：</span>
+			<input type="number" v-model="numTargetTimeHour" max="999" min="0" v-on:keypress="numTargetTimeOnKeypress">
+			<span>時</span>
+			<input type="number" v-model="numTargetTimeMin" max="59" min="0" v-on:keypress="numTargetTimeOnKeypress">
+			<span>分</span>
+			<input type="button" id="btnTargetTime" value="変換" v-on:click="calcFromToutatuJikoku">
+		</div>
+
+		<p style="font-size: x-small;">※Enterキーでも実行できます</p>
+
+		<!-- 結果表示・タイマーボタン -->
+		<div>
+			<input type="button" v-on:click="btnStartTimer" :value="timerButton">
+			<span>{{timerResult}}</span>
+		</div>
+
+		<!-- メモ・出力 -->
+		<div>
+			<p style="font-size: x-small;"></p>
+			<button v-on:click="outputCopy">↓出力</button>
+			<br>
+			<textarea v-model="memo" cols="30" rows="5" placeholder="メモ用"></textarea>
+		</div>
+
+		<!-- 電卓 -->
+		<div class="calculator">
+			<table>
+				<tbody>
+					<tr>
+						<td colspan="4" class="result">{{ calc }}</td>
+					</tr>
+					<tr>
+						<td><input type="button" value="C" v-on:click="calc = '0'"></td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td><input type="button" value="/" v-on:click="calcInput"></td>
+					</tr>
+					<tr>
+						<td><input type="button" value="7" v-on:click="calcInput"></td>
+						<td><input type="button" value="8" v-on:click="calcInput"></td>
+						<td><input type="button" value="9" v-on:click="calcInput"></td>
+						<td><input type="button" value="*" v-on:click="calcInput"></td>
+					</tr>
+					<tr>
+						<td><input type="button" value="4" v-on:click="calcInput"></td>
+						<td><input type="button" value="5" v-on:click="calcInput"></td>
+						<td><input type="button" value="6" v-on:click="calcInput"></td>
+						<td><input type="button" value="-" v-on:click="calcInput"></td>
+					</tr>
+					<tr>
+						<td><input type="button" value="1" v-on:click="calcInput"></td>
+						<td><input type="button" value="2" v-on:click="calcInput"></td>
+						<td><input type="button" value="3" v-on:click="calcInput"></td>
+						<td><input type="button" value="+" v-on:click="calcInput"></td>
+					</tr>
+					<tr>
+						<td><input type="button" value="0" v-on:click="calcInput"></td>
+						<td>&nbsp;</td>
+						<td><input type="button" value="." v-on:click="calcInput"></td>
+						<td><input type="button" value="=" v-on:click="calcExec"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- 最終更新日時 -->
+		<p style="font-size: small;">Last Update: {{ lastModified }}</p>
+		<br>
+
+	</div>
+	<script>
+		const vue = new Vue({
+			el: '#vue',
+			data: {
+				nowDateTime:null, // 現在時刻
+				dayList: ['日','月','火','水','木','金','土'], // 曜日定義
+
+				// 回復種別
+				timePattern:{
+					// 選択肢
+					list: [
+						{
+							name: 'デレステ',
+							value: 5,
+							mode: [
+								{
+									name: 'MASTER',
+									value: 15,
+								},
+								{
+									name: 'PRO',
+									value: 12,
+								},
+							],
+						},
+						{
+							name: 'デレステ(営業)',
+							value: 15,
+							mode: [
+								{
+									name: '10H',
+									value: 40,
+								},
+								{
+									name: '6H',
+									value: 24,
+								},
+							],
+						},
+						{
+							name: 'ウマ娘(育成TP)',
+							value: 10,
+							mode: [
+								{
+									name: '1回',
+									value: 30,
+								},
+								{
+									name: 'MAX',
+									value: 100,
+								},
+							],
+						},
+						{
+							name: 'ウマ娘(レースRP)',
+							value: 120,
+							mode: [
+								{
+									name: '1回',
+									value: 1,
+								},
+								{
+									name: 'MAX',
+									value: 5,
+								},
+							],
+						},
+						{
+							name: 'ツイステ',
+							value: 15,
+							mode: [
+								{
+									name: 'MAX',
+									value: 10,
+								},
+							],
+						},
+						{
+							name: 'ツイステMS',
+							value: 1,
+							mode: [
+								{
+									name: '20min',
+									value: 20,
+								},
+								{
+									name: '60min',
+									value: 60,
+								},
+								{
+									name: '150min',
+									value: 150,
+								},
+								{
+									name: '360min',
+									value: 360,
+								},
+							],
+						},
+					],
+					selectIndex:0, // 選択した回復種別
+					selectMode:null, // 選択した回復種別mode
+				},
+
+				numBaseTime: 5, // 回復基準
+				numTargetValue: 0, // 回復量
+				numRequiredTimeHour:null, // 所要時間(時)
+				numRequiredTimeMin:null, // 所要時間(分)
+				numTargetTimeHour:null, // 到達時刻(時)
+				numTargetTimeMin:null, // 到達時刻(分)
+
+				// タイマーセット用
+				timerResult: null, // 計算結果
+				timerSet:0,
+				timer:null,
+				timerButton:'タイマースタート', // タイマーボタンのラベル(スタート/ストップ)
+				timerLabel:'', // タイマー登録時点の計算内容(copyDispTimerより分離しておく)
+
+				memo: null, // メモ
+				copyDispTimer: '', // コピペ用文字列
+
+				calc: '0', // 電卓用文字列
+
+				lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
+			},
+			mounted() {
+				// 現在時刻を表示し続ける
+				setInterval(() => this.dispNowDateTime(), 1000);
+			},
+			methods: {
+				/** 現在時刻表示 */
+				dispNowDateTime () {
+					this.nowDateTime = this.FormatDate(new Date(), '/', true, true);
+				},
+
+				/** 日付変換
+				* Date型を受け取った場合はその値で、
+				* 受け取らなかったら呼び出された時点の日時を
+				* [YYYY/MM/DD(d) HH:mm:ss]形式で返却する。
+				*
+				* @module mixins/common/FormatDate
+				* @param {Date} [d=now] 変換したい日付
+				* @param {String} [f='/'] 日付の区切り文字
+				* @param {Boolean} [time = true] 時刻を表示するかどうか
+				* @param {Boolean} [day = true] 曜日を表示するかどうか
+				* @returns {String} [YYYY/MM/DD(d) HH:mm:ss] 形式文字列
+				*/
+				FormatDate(d = new Date(), f = '/', time = true, day = true) {
+					return `${d.getFullYear()}${f}${(d.getMonth() + 1).toString().padStart(2, '0')}${f}${d.getDate().toString().padStart(2, '0')}${day ? `(${this.dayList[d.getDay()]})` : ''}${time ? ` ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}` : ''}`
+				},
+			
+				/** 回復種別変更イベント */
+				timePatternOnChange () {
+					// modeの選択をリセット
+					this.timePatternModeSelected = null;
+					// 回復基準に反映
+					this.numBaseTime = this.timePattern.list[this.timePattern.selectIndex].value;
+				},
+
+				/** 回復種別モード変更イベント */
+				timePatternModeOnChange () {
+					// 回復量に反映
+					this.numTargetValue = this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].value;
+				},
+
+				/** 回復量キーダウンイベント */
+				numTargetValueOnKeypress (e) {
+					if (e.which == 13) {
+						this.calcFromKaihukuryo();
+					}
+				},
+
+				/** 回復量から変換 */
+				calcFromKaihukuryo() {
+					// タイマークリア
+					clearInterval(this.timer);
+
+					// 計算→表示
+					var ret = Number(this.numTargetValue) * this.numBaseTime;
+					var hour = Math.floor(ret / 60);
+					var min = ret % 60;
+					var setDate = new Date();
+					setDate.setMinutes(setDate.getMinutes() + ret);
+					this.dispResult(null, hour, min, setDate.getHours(), setDate.getMinutes());
+
+					// タイマー準備
+					this.timerSet = (hour * 60 + min) * 60;
+					this.dispTimer();
+				},
+
+				/** 所要時間キーダウンイベント */
+				numRequiredTimeOnKeypress(e) {
+					if (e.which == 13) {
+						this.calcFromSyoyoJikan();
+					}
+				},
+				
+				/** 所要時間から変換 */
+				calcFromSyoyoJikan() {
+					// タイマークリア
+					clearInterval(this.timer);
+
+					// 計算→表示
+					var hour = Number(this.numRequiredTimeHour);
+					var min = Number(this.numRequiredTimeMin);
+					var ret = Math.floor((hour * 60 + min) / this.numBaseTime);
+					var setDate = new Date();
+					setDate.setMinutes(setDate.getMinutes() + hour * 60 + min);
+					this.dispResult(ret, null, null, setDate.getHours(), setDate.getMinutes());
+
+					// タイマー準備
+					this.timerSet = (hour * 60 + min) * 60;
+					this.dispTimer();
+				},
+
+				/** 到達時刻キーダウンイベント */
+				numTargetTimeOnKeypress (e) {
+					if (e.which == 13) {
+						this.calcFromToutatuJikoku();
+					}
+				},
+
+				/** 到達時刻から変換 */
+				calcFromToutatuJikoku () {
+					// タイマークリア
+					clearInterval(this.timer);
+
+					// 計算→表示
+					var addHour = Number(this.numTargetTimeHour);
+					var addMin = Number(this.numTargetTimeMin);
+					var nowDate = new Date();
+					var tgtDate;
+					if (nowDate.getHours() * 60 + nowDate.getMinutes() < addHour * 60 + addMin) {
+						// 日付変更なし
+						tgtDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), addHour, addMin);
+					} else {
+						// 日付変更あり
+						tgtDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate() + 1, addHour, addMin);
+					}
+					var min = Math.floor((tgtDate - nowDate) / 60000);
+					this.dispResult(Math.floor(min / this.numBaseTime), Math.floor(min / 60), min % 60, null, null);
+
+					// タイマー準備
+					this.timerSet = min * 60;
+					this.dispTimer();
+				},
+
+				/** 計算結果表示 */
+				dispResult(ret, hour, min, addHour, addMin) {
+					// 回復量
+					if (ret != null) this.numTargetValue = ret;
+
+					// 所要時間
+					if (hour != null) this.numRequiredTimeHour = hour;
+					if (min != null) this.numRequiredTimeMin = min;
+
+					// 到達時刻
+					if (addHour != null) this.numTargetTimeHour = addHour;
+					if (addMin != null) this.numTargetTimeMin = addMin;
+				},
+
+				/** タイマー用時刻表示 */
+				dispTimer() {
+					var sec = this.timerSet % 60;
+					var min = Math.floor(this.timerSet / 60);
+					var hour = Math.floor(min / 60);
+					min = min - hour * 60;
+					this.timerResult = "あと " + hour + "時間" + min + "分" + sec + "秒";
+
+					// 計算結果を表示した際、ここで「種別、回復量、到達時刻」をコピー出力？できる値を作っておく
+					this.copyDispTimer = `種別：${this.timePattern.list[this.timePattern.selectIndex].name}, 回復量：${this.numTargetValue}, 到達時刻:${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')}`;
+				},
+				
+				/** 現在の計算結果をメモに出力 */
+				outputCopy () {
+					// メモに既存入力があれば改行を付与した上で追加
+					this.memo = (this.memo || '') + (this.memo && this.memo.length > 0 ? '\n' : '') + this.copyDispTimer;
+				},
+
+				/** タイマースタート/ストップ */
+				btnStartTimer () {
+					if (this.timerButton == 'タイマーストップ') {
+						// タイマーストップから押された→タイマー終了
+						clearInterval(this.timer);
+						this.timerLabel = '';
+						this.timerButton = 'タイマースタート';
+						this.timerSet = 0;
+						this.timerResult = '';
+
+					} else if (this.timerSet > 0) {
+						// タイマースタート
+						console.log("タイマースタート：" + this.FormatDate());
+						this.timerLabel = this.copyDispTimer;
+						this.timerButton = 'タイマーストップ';
+						this.timer = setInterval(() => {
+							this.timerSet -= 1;
+							this.dispTimer();
+							if (this.timerSet == 0) {
+								clearInterval(this.timer);
+								alert("完了\n" + this.timerLabel);
+								this.timerLabel = '';
+							}
+						}, 1000);
+					}
+				},
+
+				/** 電卓入力 */
+				calcInput(event) {
+					// ゼロ除算対策：それまで入力されている文字に「0」「.」以外が含まれていればOK
+					if (!this.calc.split('0').join('').split('.').join('').length > 0 && event.target.value == '/') {
+						return;
+					}
+
+					// 初期値0 かつ 入力値が「.」「/」でないなら上書き、それ以外なら追加していく
+					this.calc = this.calc === '0' && event.target.value !== '.'
+						? event.target.value
+						: this.calc + event.target.value
+				},
+
+				/** 電卓計算結果反映 */
+				calcExec() {
+					console.log(`this.calc = ${this.calc}`)
+
+					// 文字列として保持していた計算を実行
+					// https://techacademy.jp/magazine/21139
+					this.calc = new Function("return " + this.calc)()
+
+					// 小数点4桁以下は切り捨て(切り捨て結果が違う場合のみ実行)
+					if (this.calc !== Math.floor(this.calc * 10000) / 10000) {
+						this.calc = (Math.floor(this.calc * 10000) / 10000).toString() + '...'
+					}
+				}
+			},
+
+		});
+	</script>
+</body>
+</html>
