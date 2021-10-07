@@ -102,6 +102,8 @@
 </div>
 
 <div>
+	<p style="font-size: x-small;"></p>
+	<button onclick="outputCopy()">出力</button>
 	<br>
 	<textarea name="" id="memo" cols="30" rows="5" placeholder="メモ用"></textarea>
 </div>
@@ -176,13 +178,13 @@
 			baseTime = Number(selectedPattern);
 
 			/*
-					今の手入力もそのまま残しつつ、候補リストから選ばせて入力する
-		・デレステ→5分1回復、1単位使用
-		・デレステ(営業)→15分1回復→10Hなら40単位使用
-		・ウマ娘(育成TP)→10分1回復→30単位使用100MAX→16:40必要
-		・ウマ娘(レースRP)→120分1回復→5MAX→10:00必要
-		・ツイステ→15分1回復、1単位使用
-*/
+				今の手入力もそのまま残しつつ、候補リストから選ばせて入力する
+				・デレステ→5分1回復、1単位使用
+				・デレステ(営業)→15分1回復→10Hなら40単位使用
+				・ウマ娘(育成TP)→10分1回復→30単位使用100MAX→16:40必要
+				・ウマ娘(レースRP)→120分1回復→5MAX→10:00必要
+				・ツイステ→15分1回復、1単位使用
+			*/
 			// 消費凡例を表示する
 			const options = []
 			switch ($('#timePattern :selected').html()) {
@@ -350,6 +352,7 @@
 	}
 
 	// タイマー用時刻表示
+	let copyDispTimer = ''; // コピペ用文字列
 	function dispTimer() {
 		var dispTime = timerSet;
 		var sec = dispTime % 60;
@@ -357,8 +360,16 @@
 		var hour = Math.floor(min / 60);
 		min = min - hour * 60;
 		$("#timerResult").html("あと " + hour + "時間" + min + "分" + sec + "秒");
+		
+		// 計算結果を表示した際、ここで「種別、回復量、到達時刻」をコピー出力？できる値を作っておく
+		copyDispTimer = `種別：${$('#timePattern :selected').html()}, 回復量：${$('.numTargetValue').val()}, 到達時刻:${($('.numTargetTime.hour').val() || '0').padStart(2, '0')}:${($('.numTargetTime.min').val() || '0').padStart(2, '0')}`;
+	}
 
-		// TODO: ここで計算結果を表示した際、種別、回復量、到達時刻をコピー(出力？)できるボタンを作る→押したらtextareaに反映
+	/** 現在の計算結果をメモに出力 */
+	function outputCopy () {
+		// メモに既存入力があれば改行を付与した上で追加
+		const memoVal = $('#memo').val();
+		$('#memo').val((memoVal && memoVal.length > 0 ? memoVal + '\n' : memoVal) + copyDispTimer);
 	}
 
 	/** 電卓用文字列 */
