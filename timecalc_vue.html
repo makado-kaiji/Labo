@@ -268,7 +268,7 @@
 				},
 
 				numBaseTime: 5, // 回復基準
-				numTargetValue: 0, // 回復量
+				numTargetValue: null, // 回復量
 				numRequiredTimeHour:null, // 所要時間(時)
 				numRequiredTimeMin:null, // 所要時間(分)
 				numTargetTimeHour:null, // 到達時刻(時)
@@ -317,7 +317,7 @@
 				/** 回復種別変更イベント */
 				timePatternOnChange () {
 					// modeの選択をリセット
-					this.timePatternModeSelected = null;
+					this.timePattern.selectMode = null;
 					// 回復基準に反映
 					this.numBaseTime = this.timePattern.list[this.timePattern.selectIndex].value;
 				},
