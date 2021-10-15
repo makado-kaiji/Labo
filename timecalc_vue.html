@@ -263,7 +263,7 @@
 							],
 						},
 					],
-					selectIndex:0, // 選択した回復種別
+					selectIndex:null, // 選択した回復種別
 					selectMode:null, // 選択した回復種別mode
 				},
 
@@ -291,6 +291,10 @@
 			mounted() {
 				// 現在時刻を表示し続ける
 				setInterval(() => this.dispNowDateTime(), 1000);
+
+				// 選択した回復種別 初期値：ウマ娘(育成TP)
+				this.timePattern.selectIndex = 2;
+				this.timePatternOnChange();
 			},
 			methods: {
 				/** 現在時刻表示 */
