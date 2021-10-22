@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title></title>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+	<script src="json.js"></script>
+
+</head>
+<body>
+	<div id="vue">
+		<details>
+			<summary>データについて</summary>
+			<div>
+				<a href="https://gamewith.jp/uma-musume/article/show/258835" target="_blank">【ウマ娘】レース一覧 - ゲームウィズ</a> 様のデータをお借りしています。
+				<br>
+				コンソールから以下を実行
+				<br>
+				let json = JSON.parse( $('.article-wrap > script[type="application/ld+json"]').html());
+				<br>
+				console.log(JSON.stringify(json));
+				<br>
+				出てきたjsonをjson.jsにコピペしました。
+			</div>
+		</details>
+
+		<button v-on:click="exec">初期化</button>
+
+		<!-- データ部：解析できたら表示 -->
+		<div v-if="tableView.length > 0">
+			<span>{{tableView.length}} 件 / {{table.length}}件中</span>
+			<br>
+			<table style="border-collapse:collapse; table-layout: auto;">
+				<!-- ヘッダー -->
+				<thead style="vertical-align: top; text-align: left;">
+					<tr>
+						<th style="border-right: 1px dotted #ccc;">#</th>
+						<th
+							v-for="(th, thIndex) in headers" v-bind:key="`th-${thIndex}`"
+							v-bind:style="thIndex < headers.length - 1 ? 'border-right: 1px dotted #ccc;' : ''">
+							<span>{{th}}</span>
+							<br>
+							<!-- 検索用 -->
+							<!-- HACK: こいつに何もしないとtd幅の自動調整が効かなくなるので注意
+							header文字数を同じ文字数分+1文字の半角幅を取っておく -->
+							<input v-bind:style="GetInputWidth(th)" type="text" placeholder="key" v-model="searchKey[thIndex]" v-on:change="inputSearchKey">
+						</th>
+					</tr>
+				</thead>
+				<!-- データ部 -->
+				<tbody style="vertical-align: top;">
+					<tr v-for="(tr, trIndex) in tableView" v-bind:key="`tr-${trIndex}`" style="border-top:1px solid #aaa;">
+						<td style="border-right: 1px dotted #ccc;">{{trIndex}}</td>
+						<td
+							v-for="(td, tdIndex) in tr" v-bind:key="`td-${trIndex}-${tdIndex}`"
+							v-bind:title="`${trIndex}: ${tdIndex}`"
+							v-bind:style="'word-break: break-all;' + (tdIndex != headers[headers.length - 1] ? 'border-right: 1px dotted #ccc;' : '')">
+							<span>{{td}}</span>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+	</div>
+	<script>
+		const vue = new Vue({
+			el: '#vue',
+			data:{
+				headers: [], // データテーブルのヘッダー
+				searchKey: [], // 検索用キーワード（各列ごと）
+				table: [], // データテーブル
+				tableView: [], // データテーブル（検索結果）
+
+				articleBody:[], // jsonから整形する一次配列
+			},
+			mounted() {
+				this.exec();
+			},
+			methods: {
+				exec () {
+					// 一旦クリア
+					this.headers = [];
+					this.tableView = [];
+					this.table = [];
+
+					// console.log(json);
+
+					// ヘッダー定義（8分割後のtable格納と揃える）
+					this.headers = ['year', 'month', 'half', 'name', 'className', 'grade', 'field', 'meter', 'meterName', 'turn',];
+
+					// ヘッダー分だけ検索キー配列を空文字で作っておく
+					this.searchKey =  [...Array(this.headers.length)].map((_, i) => '');
+					
+					this.articleBody = json.articleBody.split('レース詳細')[1].split('&rarr;')[0].split('年目 ');
+					// console.log(this.articleBody);
+
+					// 「年目 」で区切ると、一つ前の末尾の数字(1,2,3)が自分の行のデータになっているので再整形
+					let lastStr = ''; // 末尾1文字（前に取っておいて後で先頭に追加する）
+					for (let i = 0; i < this.articleBody.length; i++) {
+
+						// index[0]は「1」のみ（1件目の「1年目 」を分割した結果）
+						if (i == 0) {
+							// 自分行の末尾1文字を保存しておく
+							lastStr = this.articleBody[i].substr(-1, 1);
+							continue;
+						}
+
+						// 解析対象行：index[1]～最後まで
+						// console.log(`[${i}] ${this.articleBody[i]}`);
+						
+						// 保存しておいた1つ前の末尾1文字を取ってきて自分行の先頭に追加
+						this.articleBody[i] = lastStr + '年目 / ' + this.articleBody[i];
+						
+						// 自分行の末尾1文字を保存しておく
+						lastStr = this.articleBody[i].substr(-1, 1);
+
+						// 自分行の末尾が数字(1,2,3)でない → 最終行
+						if (lastStr != '1' && lastStr != '2' && lastStr != '3') {
+							// console.log(`lastStr: ${lastStr}`);
+						}
+
+						// 自分行の末尾1文字を削る
+						this.articleBody[i] = this.articleBody[i].slice(0, -1);
+
+						// 「X月前半」か「X月後半」が必ず入っているので分割
+						// 「半」で分割するとレース名などに引っかかりそうなのでやめておく
+						this.articleBody[i] = this.articleBody[i].split('月前半').join('月前半 / ').split('月後半').join('月後半 / ');
+
+						// この時点でこんな感じ
+						// 1年目 / 7月後半 / 中京ジュニアステークスジュニア / OP / 中京芝 / 1600m(マイル) / 左
+						// 「 / 」区切りで
+						// 年数、時期、レース名＋階級、グレード、バ場、方向
+						// 「レース名＋階級」は、レース名自体に「ジュニア」などが入っているので分割に注意
+
+						// 一旦現時点で分割 → 「レース名＋階級」のみ再分割
+						let td = this.articleBody[i].split(' / ');
+
+						// 末尾8文字を取ればどれかの階級は入っているはず
+						let className = td[2].substr(-8);
+						// console.log(`[${i}]${className} ${this.articleBody[i]}`);
+
+						if (className == 'クラシックシニア') {
+								// 2年目, 3年目に同じレースがある場合はこれになっている
+								// 自分行の「年数」で判断して削る
+								className = td[0] == '2年目' ? 'クラシック' : 'シニア';
+						}
+
+						// 再分割
+						if (td[2].includes('ジュニア')) {
+							td[2] = this.formatRaceName(td[2], 'ジュニア') + ' / ジュニア';
+
+						} else if (td[2].includes('クラシック')) {
+							td[2] = this.formatRaceName(td[2], 'クラシック') + ' / クラシック';
+
+						} else if (td[2].includes('シニア')) {
+							td[2] = this.formatRaceName(td[2], 'シニア') + ' / シニア';
+
+						} else {
+							// 基本的に想定外、↑のどれかに入るはず
+							console.log(`td[2] 想定外: ${td[2]}`);
+						}
+
+						// 再分割が終わったら全結合→最終分割
+						td = td.join(' / ').split(' / ');
+
+						// 8分割できたら成功
+						if (td.length == 8) {
+							// console.log(td);
+
+							// 更に細々と分割しつつテーブルデータに格納
+							this.table.push({
+								year: Number(td[0].split('年目')[0]),
+								month: Number(td[1].split('月')[0]),
+								half: Number(td[1].split('月')[1].includes('前') ? 1 : 2),
+								name: td[2],
+								className: td[3],
+								grade: td[4],
+								field: td[5],
+								meter: Number(td[6].split('m(')[0]),
+								meterName: td[6].split('m(')[1].split(')')[0],
+								turn: td[7],
+							});
+						}
+
+					}
+					// データテーブル（検索結果）に反映
+					this.tableView = this.table;
+
+					// 最後まで整形し切ったら、先頭の「1」だけの配列は不要になるので削除
+					// this.articleBody.shift();
+				},
+
+				/** 「レース名＋階級」を分割してレース名だけにする
+				 * @param {string} str レース名＋階級
+				 * @param {string} cl 階級
+				 * @return {string} 階級を除いたレース名
+				 */
+				formatRaceName (str, cl) {
+					// 階級で分割
+					const l = str.split(cl);
+
+					if (l.length == 2) {
+						// 分割結果が2：1番目がそのままレース名
+						return l[0];
+
+					} else if (l.length == 3) {
+						// 分割結果が3：1番目, 2番目の間に階級を挟んで返す
+						return l[0] + cl + l[1];
+
+					} else {
+						// 上記以外：レース名に階級が複数回入るとは考えにくい
+						// 基本的に想定外とする
+						console.log(`[formatRaceName]想定外: str = ${str}, cl = ${cl}`);
+						return str; // とりあえず何もせず返す
+					}
+				},
+
+				/** 列名に合わせて検索窓の幅を設定する
+				 * @param {string} th header名
+				 * @return {string} 幅指定
+				 */
+				GetInputWidth(th) {
+
+					// 基本的にはheader名の文字数分 / 2(半角なので) + 1(余裕)
+					let w = (th.length / 2) + 1;
+
+					// 特殊だけ別指定
+					switch (th) {
+						case 'name':
+							w = 20;
+							break;
+						case 'field':
+						case 'meterName':
+							w++;
+							break;
+					}
+					return 'width: ' + w + 'em;';
+				},
+
+				/** 入力値から検索する */
+				inputSearchKey() {
+					const searchKeys = [];
+					this.searchKey.forEach((v, i) => {
+						// 入力なしならスキップ
+						if (!v || v.length == 0) return;
+
+						searchKeys.push({
+							index: i,
+							colName: this.headers[i], // 入力に対応する列名を取得
+							key: v,
+						})
+					})
+
+					// 検索条件が0件なら全件表示して終了
+					if (searchKeys.length == 0) {
+						this.tableView = this.table;
+						return;
+					}
+
+					// 全ての条件を含む列のみ抽出(大文字小文字を考慮しない)
+					this.tableView = this.table.filter(x => {
+						searchKeys.forEach((v, i) => {
+							v.isMatch = x[v.colName].toString().toLowerCase().includes(v.key.toString().toLowerCase());
+						})
+						return searchKeys.length == searchKeys.filter(y => y.isMatch)?.length;
+					})
+				},
+				
+			},
+		})
+	</script>
+</body>
+</html>
