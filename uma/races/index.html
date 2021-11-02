@@ -14,6 +14,9 @@
 		tbody tr {
 			border-top:1px solid #aaa;
 		}
+		tbody tr.bakusin {
+			color:red;
+		}
 		tbody td {
 			word-break: break-all;
 		}
@@ -136,6 +139,70 @@
 				entryDisabled:[], // 出走チェックリストの非活性フラグ
 				isDispEntryList: false, // 出走チェックONのみ表示中かどうか
 
+				// バクシン目標レース
+				bakusinRace:[
+					{
+						name:'京王杯ジュニアステークス',
+						year:1,
+						month:11,
+						half:1,
+					},
+					{
+						name: 'スプリングステークス',
+						year: 2,
+						month: 3,
+						half: 2,
+					},
+					{
+						name: '葵ステークス',
+						year: 2,
+						month: 5,
+						half: 2,
+					},
+					{
+						name: 'スプリンターズステークス',
+						year: 2,
+						month: 9,
+						half: 2,
+					},
+					{
+						name: '高松宮記念',
+						year: 3,
+						month: 3,
+						half: 2,
+					},
+					{
+						name: '函館スプリントステークス',
+						year: 2,
+						month: 6,
+						half: 2,
+					},
+					{
+						name: 'CBC賞',
+						year: 2,
+						month: 7,
+						half: 1,
+					},
+					{
+						name: 'セントウルステークス',
+						year: 2,
+						month: 9,
+						half: 1,
+					},
+					{
+						name: 'スプリンターズステークス',
+						year: 3,
+						month: 9,
+						half: 2,
+					},
+					{
+						name: 'マイルチャンピオンシップ',
+						year: 3,
+						month: 11,
+						half: 2,
+					},
+				],
+
 				lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
 			},
 			mounted() {
@@ -145,6 +212,7 @@
 				/** 読込実行 */
 				exec () {
 					// 一旦クリア
+					$(`[data-index]`).removeClass('bakusin').show();
 					this.headers = [];
 					let sortList = []; // ソート完了するまでの一時データ
 					this.table = []; // 全件データ
@@ -385,9 +453,20 @@
 						return x.field.includes('芝') && (x.meterName.includes('短距離') || x.meterName.includes('マイル'))
 					});
 
-					// TODO: ここじゃないかもだけど、出走チェック付ける
 					// TODO: ここじゃないかもだけど、３連続出走の警告表示追加（ただしバクシンの目標レースを考慮）
-					// TODO: ↑ていうか目標レースの表示切替CSSがまず必要
+					// 目標レースの表示切替CSSを追加
+					setTimeout(()=>{
+						this.bakusinRace.forEach((v,i)=>{
+							const target = this.table.find(t=>t.year==v.year&&t.month==v.month&&t.half.includes(v.half)&&t.name==v.name);
+							//console.log(`[data-index="${target.index}"]: ${JSON.stringify(target)}`);
+
+							// 赤文字
+							$(`[data-index="${target.index}"]`).addClass('bakusin');
+
+							// チェックON
+							$(`[data-index="${target.index}"] input:checkbox`).click();
+						});
+					},1);
 				},
 
 				/** 出走チェックイベント
