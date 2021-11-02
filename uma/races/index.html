@@ -10,6 +10,11 @@
 	<script src="json.js"></script>
 
 	<style>
+		/* 後半行は背景を薄い灰色にする（前半と交互に見せる） */
+		[data-half="2"] {
+			background-color: #f0f0f0;
+		}
+
 		/* レース階級 */
 		[data-grade] {
 			text-align: center;
@@ -40,7 +45,7 @@
 			</div>
 		</details>
 
-		<button v-on:click="exec">初期化</button>
+		<button v-on:click="exec">初期化</button> <button v-on:click="bakusin">バクシン</button>
 
 		<!-- データ部：解析できたら表示 -->
 		<div v-if="tableView.length > 0">
@@ -65,7 +70,11 @@
 				</thead>
 				<!-- データ部 -->
 				<tbody style="vertical-align: top;">
-					<tr v-for="(tr, trIndex) in tableView" v-bind:key="`tr-${trIndex}`" style="border-top:1px solid #aaa;">
+					<tr
+						v-for="(tr, trIndex) in tableView" v-bind:key="`tr-${trIndex}`"
+						style="border-top:1px solid #aaa;"
+						v-bind:data-half="tr.half.substr(0,1)"
+					>
 						<td style="border-right: 1px dotted #ccc;">{{trIndex}}</td>
 						<td
 							v-for="(td, tdIndex) in tr" v-bind:key="`td-${trIndex}-${tdIndex}`"
@@ -98,11 +107,13 @@
 				this.exec();
 			},
 			methods: {
+				/** 読込実行 */
 				exec () {
 					// 一旦クリア
 					this.headers = [];
-					this.tableView = [];
-					this.table = [];
+					let sortList = []; // ソート完了するまでの一時データ
+					this.table = []; // 全件データ
+					this.tableView = []; // ソート・絞込結果データ（これが一覧表示される）
 
 					// console.log(json);
 
@@ -188,8 +199,8 @@
 						if (td.length == 8) {
 							// console.log(td);
 
-							// 更に細々と分割しつつテーブルデータに格納
-							this.table.push({
+							// 更に細々と分割
+							const addRow = {
 								year: Number(td[0].split('年目')[0]),
 								month: Number(td[1].split('月')[0]),
 								half: (td[1].split('月')[1].includes('前') ? '1:' : '2:') + td[1].split('月')[1], // 1:前半、2:後半
@@ -200,10 +211,48 @@
 								meter: Number(td[6].split('m(')[0]),
 								meterName: td[6].split('m(')[1].split(')')[0],
 								turn: td[7],
-							});
+							};
+
+							// レース階級を数値化（G1=1,G2=2,G3=3,OP=4,Pre-OP=5)
+							const gradeCode = addRow.grade.includes('G')
+								? Number(addRow.grade.substr(1, 1))
+								: addRow.grade.includes('Pre') ? 5 : 4;
+
+							// 年、月、前半後半、レース階級、距離をまとめて一つの数値化する（月、前半後半はゼロ埋め2桁）
+							addRow.sortNum = Number(addRow.year.toString() + addRow.month.toString().padStart(2, '0')+ addRow.half.substr(0, 1) + gradeCode + addRow.meter.toString());
+
+							// テーブルデータに格納
+							sortList.push(addRow);
+
 						}
 
 					}
+
+					console.log(`before:\n${JSON.stringify(sortList)}`);
+					
+					// 年、月、前半後半、レース階級、距離で昇順ソート
+					sortList = sortList.sort((a,b)=>{
+						return a.sortNum - b.sortNum;
+					});
+
+					console.log(`after:\n${JSON.stringify(sortList)}`);
+
+					// ソート完了→sortNum以外をtableに格納
+					sortList.forEach((v,i)=>{
+						this.table.push({
+							year: v.year,
+							month: v.month,
+							half: v.half,
+							grade: v.grade,
+							name: v.name,
+							className: v.className,
+							field: v.field,
+							meter: v.meter,
+							meterName: v.meterName,
+							turn: v.turn,
+						})
+					});
+					
 					// データテーブル（検索結果）に反映
 					this.tableView = this.table;
 
@@ -287,6 +336,17 @@
 					})
 				},
 				
+				/** バクシン金策モード */
+				bakusin () {
+					// 芝＆短距離・マイルで絞込
+					this.tableView = this.table.filter(x=>{
+						return x.field.includes('芝') && (x.meterName.includes('短距離') || x.meterName.includes('マイル'))
+					});
+
+					// TODO: ここじゃないかもだけど、出走チェック付ける
+					// TODO: ここじゃないかもだけど、３連続出走の警告表示追加（ただしバクシンの目標レースを考慮）
+					// TODO: ↑ていうか目標レースの表示切替CSSがまず必要
+				},
 			},
 		})
 	</script>
