@@ -14,7 +14,7 @@
 		tbody tr {
 			border-top:1px solid #aaa;
 		}
-		tbody tr.bakusin {
+		tbody tr[data-bakusin] {
 			color:red;
 		}
 		tbody td {
@@ -65,7 +65,7 @@
 		</details>
 
 		<button v-on:click="exec">初期化</button>
-		<button v-on:click="bakusin">バクシン</button>
+		<button v-on:click="bakusin">バクシン:{{isBakusinMode}}</button>
 		<button v-on:click="dispEntryList">出走確認:{{isDispEntryList}}</button>
 		<button v-on:click="clearCache">キャッシュクリア</button>
 
@@ -97,6 +97,7 @@
 						v-bind:data-index="tr.index"
 						v-bind:data-half="tr.half.substr(0,1)"
 						v-bind:data-checked="entryInput[tr.index]"
+						v-bind:data-bakusin="isBakusinMode && bakusinRace.find(x=>x.index==tr.index) ? true : false"
 					>
 						<td
 							v-for="(td, tdIndex) in tr" v-bind:key="`td-${trIndex}-${tdIndex}`"
@@ -146,62 +147,73 @@
 						year:1,
 						month:11,
 						half:1,
+						index:-1, // tableのindex（後でセットする）
 					},
 					{
 						name: 'スプリングステークス',
 						year: 2,
 						month: 3,
 						half: 2,
+						index: -1,
 					},
 					{
 						name: '葵ステークス',
 						year: 2,
 						month: 5,
 						half: 2,
+						index: -1,
 					},
 					{
 						name: 'スプリンターズステークス',
 						year: 2,
 						month: 9,
 						half: 2,
+						index: -1,
 					},
 					{
 						name: '高松宮記念',
 						year: 3,
 						month: 3,
 						half: 2,
+						index: -1,
 					},
 					{
 						name: '函館スプリントステークス',
 						year: 2,
 						month: 6,
 						half: 2,
+						index: -1,
 					},
 					{
 						name: 'CBC賞',
 						year: 2,
 						month: 7,
 						half: 1,
+						index: -1,
 					},
 					{
 						name: 'セントウルステークス',
 						year: 2,
 						month: 9,
 						half: 1,
+						index: -1,
 					},
 					{
 						name: 'スプリンターズステークス',
 						year: 3,
 						month: 9,
 						half: 2,
+						index: -1,
 					},
 					{
 						name: 'マイルチャンピオンシップ',
 						year: 3,
 						month: 11,
 						half: 2,
+						index: -1,
 					},
 				],
+				isBakusinMode: false, // バクシン絞込フラグ
 
 				lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
 			},
@@ -213,6 +225,7 @@
 				exec () {
 					// 一旦クリア
 					$(`[data-index]`).removeClass('bakusin').show();
+					this.isBakusinMode = false;
 					this.headers = [];
 					let sortList = []; // ソート完了するまでの一時データ
 					this.table = []; // 全件データ
@@ -354,7 +367,13 @@
 							meter: v.meter,
 							meterName: v.meterName,
 							turn: v.turn,
-						})
+						});
+
+						// バクシン目標レースかどうか→合致したらバクシン目標レース定義の方のindexを設定
+						const isBakusin = this.bakusinRace.findIndex(b => b.year == v.year && b.month == v.month && v.half.includes(b.half) && b.name == v.name);
+						if (isBakusin > -1) {
+							this.bakusinRace[isBakusin].index = i;
+						}
 					});
 					
 					// 行分だけ出走チェックリストを作っておく
@@ -448,20 +467,46 @@
 				
 				/** バクシン金策モード */
 				bakusin () {
-					// 芝＆短距離・マイルで絞込
-					this.tableView = this.table.filter(x=>{
-						return x.field.includes('芝') && (x.meterName.includes('短距離') || x.meterName.includes('マイル'))
+					this.tableView = []; // 一旦リセット
+
+					this.isBakusinMode = !this.isBakusinMode // フラグ反転
+
+					this.table.forEach((x,i) => {
+						// まずG3以上＆芝＆短距離・マイルで絞込
+						let target = {};
+						if (x.grade.includes('G') && x.field.includes('芝') && (x.meterName.includes('短距離') || x.meterName.includes('マイル'))) {
+							target = JSON.parse(JSON.stringify(x));
+						} else {
+							return; // 対象外
+						}
+
+						// 更にバクシン目標リストと突き合わせ
+						// 年、月、前半後半が一致、かつ名称は不一致→目標レース時の他レースなので除外
+						const isBakusin = this.bakusinRace.find(b=>b.year==target.year && b.month == target.month && target.half.includes(b.half));
+
+						if (isBakusin) {
+							if (isBakusin.name == target.name) {
+								this.tableView.push(target);
+							} else {
+								// ここは同時期に目標レースがある別レース
+								console.log(`同時期目標除外：${JSON.stringify(target)}`);
+							}
+						} else {
+							this.tableView.push(target);
+						}
 					});
 
 					// TODO: ここじゃないかもだけど、３連続出走の警告表示追加（ただしバクシンの目標レースを考慮）
+					
 					// 目標レースの表示切替CSSを追加
 					setTimeout(()=>{
 						this.bakusinRace.forEach((v,i)=>{
 							const target = this.table.find(t=>t.year==v.year&&t.month==v.month&&t.half.includes(v.half)&&t.name==v.name);
 							//console.log(`[data-index="${target.index}"]: ${JSON.stringify(target)}`);
 
+							// TODO: jqueryのclass付けによる赤文字は他の絞り込みとずれるのでダメ、多分チェックも、computedとかバクシンモードONとかでvueの方で対応すること！
 							// 赤文字
-							$(`[data-index="${target.index}"]`).addClass('bakusin');
+							// $(`[data-index="${target.index}"]`).addClass('bakusin');
 
 							// チェックON
 							$(`[data-index="${target.index}"] input:checkbox`).click();
