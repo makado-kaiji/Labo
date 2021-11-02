@@ -89,19 +89,24 @@
 					</tr>
 				</tbody>
 			</table>
+
 		</div>
 
+		<!-- 最終更新日時 -->
+		<p style="font-size: small;">Last Update: {{ lastModified }}</p>
 	</div>
 	<script>
 		const vue = new Vue({
 			el: '#vue',
 			data:{
+				articleBody:[], // jsonから整形する一次配列
+				
 				headers: [], // データテーブルのヘッダー
 				searchKey: [], // 検索用キーワード（各列ごと）
 				table: [], // データテーブル
 				tableView: [], // データテーブル（検索結果）
 
-				articleBody:[], // jsonから整形する一次配列
+				lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
 			},
 			mounted() {
 				this.exec();
@@ -228,14 +233,14 @@
 
 					}
 
-					console.log(`before:\n${JSON.stringify(sortList)}`);
+					// console.log(`before:\n${JSON.stringify(sortList)}`);
 					
 					// 年、月、前半後半、レース階級、距離で昇順ソート
 					sortList = sortList.sort((a,b)=>{
 						return a.sortNum - b.sortNum;
 					});
 
-					console.log(`after:\n${JSON.stringify(sortList)}`);
+					// console.log(`after:\n${JSON.stringify(sortList)}`);
 
 					// ソート完了→sortNum以外をtableに格納
 					sortList.forEach((v,i)=>{
