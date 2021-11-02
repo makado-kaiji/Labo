@@ -8,8 +8,19 @@
 
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
 	<script src="json.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 	<style>
+		tbody tr {
+			border-top:1px solid #aaa;
+		}
+		tbody td {
+			word-break: break-all;
+		}
+		tbody td:not(:last-child) {
+			border-right: 1px dotted #ccc;
+		}
+
 		/* 後半行は背景を薄い灰色にする（前半と交互に見せる） */
 		[data-half="2"] {
 			background-color: #f0f0f0;
@@ -50,7 +61,9 @@
 			</div>
 		</details>
 
-		<button v-on:click="exec">初期化</button> <button v-on:click="bakusin">バクシン</button>
+		<button v-on:click="exec">初期化</button>
+		<button v-on:click="bakusin">バクシン</button>
+		<button v-on:click="dispEntryList">出走確認:{{isDispEntryList}}</button>
 
 		<!-- データ部：解析できたら表示 -->
 		<div v-if="tableView.length > 0">
@@ -77,27 +90,26 @@
 				<tbody style="vertical-align: top;">
 					<tr
 						v-for="(tr, trIndex) in tableView" v-bind:key="`tr-${trIndex}`"
-						style="border-top:1px solid #aaa;"
+						v-bind:data-index="tr.index"
 						v-bind:data-half="tr.half.substr(0,1)"
-						v-bind:data-checked="entryInput[trIndex]"
+						v-bind:data-checked="entryInput[tr.index]"
 					>
-						<!-- index, 出走チェック  -->
-						<td style="border-right: 1px dotted #ccc;">
-							<label>
-								<input type="checkbox" name="" id="" v-model="entryInput[trIndex]" v-on:change="checkEntry(trIndex)" v-bind:disabled="entryDisabled[trIndex]">{{trIndex}}
-							</label>
-						</td>
-
-						<!-- データ部 -->
 						<td
 							v-for="(td, tdIndex) in tr" v-bind:key="`td-${trIndex}-${tdIndex}`"
-							v-bind:title="`${trIndex}: ${tdIndex}`"
-							v-bind:style="'word-break: break-all;' + (tdIndex != headers[headers.length - 1] ? 'border-right: 1px dotted #ccc;' : '')"
+							v-bind:title="`${tr.index}: ${tdIndex}`"
 							v-bind:data-grade="tdIndex == 'grade' ? td : null"
 						>
+							<!-- index, 出走チェック  -->
+							<label v-if="tdIndex == 'index'">
+								<input type="checkbox" v-model="entryInput[tr.index]" v-on:change="checkEntry(tr.index)" v-bind:disabled="entryDisabled[tr.index]">{{tr.index}}
+							</label>
+
 							<!-- レース階級 -->
-							<span v-if="tdIndex == 'grade'"> {{td}} </span>
+							<span v-else-if="tdIndex == 'grade'"> {{td}} </span>
+
+							<!-- その他の列 -->
 							<span v-else>{{td}}</span>
+
 						</td>
 					</tr>
 				</tbody>
@@ -121,6 +133,7 @@
 
 				entryInput:[], // 出走チェック（各行分）
 				entryDisabled:[], // 出走チェックリストの非活性フラグ
+				isDispEntryList: false, // 出走チェックONのみ表示中かどうか
 
 				lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
 			},
@@ -261,6 +274,7 @@
 					// ソート完了→sortNum以外をtableに格納
 					sortList.forEach((v,i)=>{
 						this.table.push({
+							index:i,
 							year: v.year,
 							month: v.month,
 							half: v.half,
@@ -383,18 +397,28 @@
 					const selRow = this.table[trIndex];
 					//console.log(`selRow = ${JSON.stringify(selRow)}`);
 
-					// 出走チェック非活性フラグのリセット
-					// this.entryDisabled = [...Array(this.table.length)].map((_, i) => false);
-
 					// 選択行以外の、選択行と同じ年、月、前半後半の出走チェック活性を切り替える(選択行のチェック状態に応じて)
-					// if (this.entryInput[trIndex]) {
-						this.table.forEach((v,i)=>{
-							if (i != trIndex && v.year == selRow.year && v.month == selRow.month && v.half == selRow.half) {
-								this.entryDisabled[i] = this.entryInput[trIndex]
-							}
-						});
-					// }
+					this.table.forEach((v,i)=>{
+						if (i != trIndex && v.year == selRow.year && v.month == selRow.month && v.half == selRow.half) {
+							this.entryDisabled[i] = this.entryInput[trIndex]
+						}
+					});
 
+				},
+
+				/** 出走チェック中のレース一覧を表示 */
+				dispEntryList () {
+					// フラグ反転
+					this.isDispEntryList = !this.isDispEntryList;
+
+					if (this.isDispEntryList) {
+						// チェックONのみ表示
+						$('[data-index]').hide();
+						$('[data-index][data-checked="true"]').show();
+					} else {
+						// 全て表示に戻す
+						$('[data-index]').show();
+					}
 				},
 			},
 		})
