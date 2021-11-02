@@ -9,6 +9,19 @@
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
 	<script src="json.js"></script>
 
+	<style>
+		/* レース階級 */
+		[data-grade] {
+			text-align: center;
+			color: #fff;
+		}
+		[data-grade="G1"] { background-color: #4b82dc; }
+		[data-grade="G2"] { background-color: #f35482; }
+		[data-grade="G3"] { background-color: #37bc55; }
+		[data-grade="OP"] { background-color: #fda903; }
+		[data-grade="Pre-OP"] { background-color: #fda903; }
+	</style>
+
 </head>
 <body>
 	<div id="vue">
@@ -57,8 +70,12 @@
 						<td
 							v-for="(td, tdIndex) in tr" v-bind:key="`td-${trIndex}-${tdIndex}`"
 							v-bind:title="`${trIndex}: ${tdIndex}`"
-							v-bind:style="'word-break: break-all;' + (tdIndex != headers[headers.length - 1] ? 'border-right: 1px dotted #ccc;' : '')">
-							<span>{{td}}</span>
+							v-bind:style="'word-break: break-all;' + (tdIndex != headers[headers.length - 1] ? 'border-right: 1px dotted #ccc;' : '')"
+							v-bind:data-grade="tdIndex == 'grade' ? td : null"
+						>
+							<!-- レース階級 -->
+							<span v-if="tdIndex == 'grade'"> {{td}} </span>
+							<span v-else>{{td}}</span>
 						</td>
 					</tr>
 				</tbody>
@@ -90,7 +107,7 @@
 					// console.log(json);
 
 					// ヘッダー定義（8分割後のtable格納と揃える）
-					this.headers = ['year', 'month', 'half', 'name', 'className', 'grade', 'field', 'meter', 'meterName', 'turn',];
+					this.headers = ['year', 'month', 'half', 'grade', 'name', 'className', 'field', 'meter', 'meterName', 'turn',];
 
 					// ヘッダー分だけ検索キー配列を空文字で作っておく
 					this.searchKey =  [...Array(this.headers.length)].map((_, i) => '');
@@ -175,10 +192,10 @@
 							this.table.push({
 								year: Number(td[0].split('年目')[0]),
 								month: Number(td[1].split('月')[0]),
-								half: Number(td[1].split('月')[1].includes('前') ? 1 : 2),
+								half: (td[1].split('月')[1].includes('前') ? '1:' : '2:') + td[1].split('月')[1], // 1:前半、2:後半
+								grade: td[4],
 								name: td[2],
 								className: td[3],
-								grade: td[4],
 								field: td[5],
 								meter: Number(td[6].split('m(')[0]),
 								meterName: td[6].split('m(')[1].split(')')[0],
