@@ -15,6 +15,11 @@
 			background-color: #f0f0f0;
 		}
 
+		/* 出走選択行は太字にする */
+		[data-checked="true"] {
+			font-weight: bold;
+		}
+
 		/* レース階級 */
 		[data-grade] {
 			text-align: center;
@@ -74,8 +79,16 @@
 						v-for="(tr, trIndex) in tableView" v-bind:key="`tr-${trIndex}`"
 						style="border-top:1px solid #aaa;"
 						v-bind:data-half="tr.half.substr(0,1)"
+						v-bind:data-checked="entryInput[trIndex]"
 					>
-						<td style="border-right: 1px dotted #ccc;">{{trIndex}}</td>
+						<!-- index, 出走チェック  -->
+						<td style="border-right: 1px dotted #ccc;">
+							<label>
+								<input type="checkbox" name="" id="" v-model="entryInput[trIndex]" v-on:change="checkEntry(trIndex)" v-bind:disabled="entryDisabled[trIndex]">{{trIndex}}
+							</label>
+						</td>
+
+						<!-- データ部 -->
 						<td
 							v-for="(td, tdIndex) in tr" v-bind:key="`td-${trIndex}-${tdIndex}`"
 							v-bind:title="`${trIndex}: ${tdIndex}`"
@@ -106,6 +119,9 @@
 				table: [], // データテーブル
 				tableView: [], // データテーブル（検索結果）
 
+				entryInput:[], // 出走チェック（各行分）
+				entryDisabled:[], // 出走チェックリストの非活性フラグ
+
 				lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
 			},
 			mounted() {
@@ -126,7 +142,7 @@
 					this.headers = ['year', 'month', 'half', 'grade', 'name', 'className', 'field', 'meter', 'meterName', 'turn',];
 
 					// ヘッダー分だけ検索キー配列を空文字で作っておく
-					this.searchKey =  [...Array(this.headers.length)].map((_, i) => '');
+					this.searchKey = [...Array(this.headers.length)].map((_, i) => '');
 					
 					this.articleBody = json.articleBody.split('レース詳細')[1].split('&rarr;')[0].split('年目 ');
 					// console.log(this.articleBody);
@@ -258,6 +274,12 @@
 						})
 					});
 					
+					// 行分だけ出走チェックリストを作っておく
+					this.entryInput = [...Array(this.table.length)].map((_, i) => false);
+					
+					// 行分だけ出走チェックリストの非活性フラグを作っておく
+					this.entryDisabled = [...Array(this.table.length)].map((_, i) => false);
+
 					// データテーブル（検索結果）に反映
 					this.tableView = this.table;
 
@@ -351,6 +373,28 @@
 					// TODO: ここじゃないかもだけど、出走チェック付ける
 					// TODO: ここじゃないかもだけど、３連続出走の警告表示追加（ただしバクシンの目標レースを考慮）
 					// TODO: ↑ていうか目標レースの表示切替CSSがまず必要
+				},
+
+				/** 出走チェックイベント
+				 * @param {number} trIndex 選択行のindex
+				 */
+				checkEntry(trIndex) {
+					// 選択行
+					const selRow = this.table[trIndex];
+					//console.log(`selRow = ${JSON.stringify(selRow)}`);
+
+					// 出走チェック非活性フラグのリセット
+					// this.entryDisabled = [...Array(this.table.length)].map((_, i) => false);
+
+					// 選択行以外の、選択行と同じ年、月、前半後半の出走チェック活性を切り替える(選択行のチェック状態に応じて)
+					// if (this.entryInput[trIndex]) {
+						this.table.forEach((v,i)=>{
+							if (i != trIndex && v.year == selRow.year && v.month == selRow.month && v.half == selRow.half) {
+								this.entryDisabled[i] = this.entryInput[trIndex]
+							}
+						});
+					// }
+
 				},
 			},
 		})
