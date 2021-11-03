@@ -98,6 +98,7 @@
 						v-bind:data-half="tr.half.substr(0,1)"
 						v-bind:data-checked="entryInput[tr.index]"
 						v-bind:data-bakusin="isBakusinMode && bakusinRace.find(x=>x.index==tr.index) ? true : false"
+						v-show="isDispEntryList ? entryInput[tr.index] : true"
 					>
 						<td
 							v-for="(td, tdIndex) in tr" v-bind:key="`td-${trIndex}-${tdIndex}`"
@@ -223,8 +224,7 @@
 			methods: {
 				/** 読込実行 */
 				exec () {
-					// 一旦クリア
-					$(`[data-index]`).removeClass('bakusin').show();
+					// 一旦全てクリア
 					this.isBakusinMode = false;
 					this.headers = [];
 					let sortList = []; // ソート完了するまでの一時データ
@@ -467,51 +467,53 @@
 				
 				/** バクシン金策モード */
 				bakusin () {
-					this.tableView = []; // 一旦リセット
+					// 一旦リセット
+					this.tableView = [];
 
-					this.isBakusinMode = !this.isBakusinMode // フラグ反転
+					// フラグ反転
+					this.isBakusinMode = !this.isBakusinMode
 
-					this.table.forEach((x,i) => {
-						// まずG3以上＆芝＆短距離・マイルで絞込
-						let target = {};
-						if (x.grade.includes('G') && x.field.includes('芝') && (x.meterName.includes('短距離') || x.meterName.includes('マイル'))) {
-							target = JSON.parse(JSON.stringify(x));
-						} else {
-							return; // 対象外
-						}
-
-						// 更にバクシン目標リストと突き合わせ
-						// 年、月、前半後半が一致、かつ名称は不一致→目標レース時の他レースなので除外
-						const isBakusin = this.bakusinRace.find(b=>b.year==target.year && b.month == target.month && target.half.includes(b.half));
-
-						if (isBakusin) {
-							if (isBakusin.name == target.name) {
-								this.tableView.push(target);
+					if (this.isBakusinMode) {
+						// バクシンON
+						this.table.forEach((x, i) => {
+							// まずG3以上＆芝＆短距離・マイルで絞込
+							let target = {};
+							if (x.grade.includes('G') && x.field.includes('芝') && (x.meterName.includes('短距離') || x.meterName.includes('マイル'))) {
+								target = JSON.parse(JSON.stringify(x));
 							} else {
-								// ここは同時期に目標レースがある別レース
-								console.log(`同時期目標除外：${JSON.stringify(target)}`);
+								return; // 対象外
 							}
-						} else {
-							this.tableView.push(target);
-						}
-					});
 
-					// TODO: ここじゃないかもだけど、３連続出走の警告表示追加（ただしバクシンの目標レースを考慮）
-					
-					// 目標レースの表示切替CSSを追加
-					setTimeout(()=>{
-						this.bakusinRace.forEach((v,i)=>{
-							const target = this.table.find(t=>t.year==v.year&&t.month==v.month&&t.half.includes(v.half)&&t.name==v.name);
-							//console.log(`[data-index="${target.index}"]: ${JSON.stringify(target)}`);
+							// バクシン目標リストと突き合わせ
+							// 年、月、前半後半が一致、かつ名称は不一致→目標レース時の他レースなので除外
+							const isBakusin = this.bakusinRace.find(b => b.year == target.year && b.month == target.month && target.half.includes(b.half));
 
-							// TODO: jqueryのclass付けによる赤文字は他の絞り込みとずれるのでダメ、多分チェックも、computedとかバクシンモードONとかでvueの方で対応すること！
-							// 赤文字
-							// $(`[data-index="${target.index}"]`).addClass('bakusin');
-
-							// チェックON
-							$(`[data-index="${target.index}"] input:checkbox`).click();
+							if (isBakusin) {
+								if (isBakusin.name == target.name) {
+									// 目標レース→表示追加、チェックON＆非活性（外させないため）
+									this.tableView.push(target);
+									this.entryInput[target.index] = true;
+									this.entryDisabled[target.index] = true;
+								} else {
+									// 同時期に目標レースがある別レース→除外
+									console.log(`同時期目標除外：${JSON.stringify(target)}`);
+								}
+							} else {
+								// それ以外→表示追加
+								this.tableView.push(target);
+							}
 						});
-					},1);
+					} else {
+						// バクシンOFF
+						// 全件表示
+						this.tableView = this.table;
+						this.bakusinRace.forEach((v,i)=>{
+							// 目標レースのチェックONが外せないようになっているので、非活性をOFF
+							this.entryDisabled[v.index] = false;
+							// 目標レースと同時期のレースが非活性になっていないので、ON
+							this.checkEntry(v.index)
+						})
+					}
 				},
 
 				/** 出走チェックイベント
@@ -529,21 +531,19 @@
 						}
 					});
 
+					// TODO: ３連続出走の警告表示追加（ただしバクシン中の場合は目標レースを考慮）
+					this.entryInput.forEach((v,i)=>{
+						if (!v) return; // チェックOFFは抜ける
+						console.log(`v=${v}, i=${i} @${(new Date()).getTime()}`);
+					});
+
+					console.log('--------------------------------------------------')
 				},
 
 				/** 出走チェック中のレース一覧を表示 */
 				dispEntryList () {
 					// フラグ反転
 					this.isDispEntryList = !this.isDispEntryList;
-
-					if (this.isDispEntryList) {
-						// チェックONのみ表示
-						$('[data-index]').hide();
-						$('[data-index][data-checked="true"]').show();
-					} else {
-						// 全て表示に戻す
-						$('[data-index]').show();
-					}
 				},
 
 				/** キャッシュを無視して再読込 */
