@@ -226,6 +226,7 @@
 				lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
 			},
 			mounted() {
+				// TODO: ここじゃないかもだけど、どこかにjson→localStorageの保存＆読込機能入れたい
 				this.exec();
 			},
 			methods: {
