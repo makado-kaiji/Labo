@@ -537,10 +537,17 @@
 					});
 
 					// TODO: ３連続出走の警告表示追加（ただしバクシン中の場合は目標レースを考慮）
+					let entryInputTable = [];
 					this.entryInput.forEach((v,i)=>{
 						if (!v) return; // チェックOFFは抜ける
-						console.log(`v=${v}, i=${i} @${(new Date()).getTime()}`);
+
+						//console.log(`v=${v}, i=${i} @${(new Date()).getTime()}`);
+						entryInputTable.push(this.table[i])
 					});
+					entryInputTable.forEach((v,i)=>{
+						// 自分の前2つもチェックONなら3連続出走
+
+					})
 
 					console.log('--------------------------------------------------')
 				},
