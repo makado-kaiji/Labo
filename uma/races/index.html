@@ -64,10 +64,17 @@
 			</div>
 		</details>
 
-		<button v-on:click="exec">初期化</button>
-		<button v-on:click="bakusin">バクシン:{{isBakusinMode}}</button>
-		<button v-on:click="dispEntryList">出走確認:{{isDispEntryList}}</button>
-		<button v-on:click="clearCache">キャッシュクリア</button>
+		<!-- ボタンエリア -->
+		<div>
+			<button v-on:click="exec">初期化</button>
+			<label>
+				<input type="checkbox" v-model="isBakusinMode" v-on:change="bakusin">バクシン
+			</label>
+			<label>
+				<input type="checkbox" v-model="isDispEntryList">出走確認
+			</label>
+			<button v-on:click="clearCache">キャッシュクリア</button>
+		</div>
 
 		<!-- データ部：解析できたら表示 -->
 		<div v-if="tableView.length > 0">
@@ -471,9 +478,6 @@
 					// 一旦リセット
 					this.tableView = [];
 
-					// フラグ反転
-					this.isBakusinMode = !this.isBakusinMode
-
 					if (this.isBakusinMode) {
 						// バクシンON
 						this.table.forEach((x, i) => {
@@ -539,12 +543,6 @@
 					});
 
 					console.log('--------------------------------------------------')
-				},
-
-				/** 出走チェック中のレース一覧を表示 */
-				dispEntryList () {
-					// フラグ反転
-					this.isDispEntryList = !this.isDispEntryList;
 				},
 
 				/** キャッシュを無視して再読込 */
