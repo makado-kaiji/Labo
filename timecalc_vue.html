@@ -112,7 +112,7 @@
 		<!-- メモ・出力 -->
 		<div>
 			<p style="font-size: x-small;"></p>
-			<button v-on:click="outputCopy">↓出力</button>
+			<!-- <button v-on:click="outputCopy">↓出力</button> -->
 			<br>
 			<textarea v-model="memo" style="width: calc(100% - 10px);" rows="5" placeholder="メモ用"></textarea>
 		</div>
@@ -437,7 +437,10 @@
 					this.timerResult = "あと " + hour + "時間" + min + "分" + sec + "秒";
 
 					// 計算結果を表示した際、ここで「種別、回復量、到達時刻」をコピー出力？できる値を作っておく
-					this.copyDispTimer = `種別：${this.timePattern.list[this.timePattern.selectIndex].name}, 回復量：${this.numTargetValue}, 到達時刻:${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')}`;
+					let d = new Date();
+					this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name} ${this.numTargetValue}回復 ＠${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+
+					this.outputCopy() // 以前はボタン押下でやってたが、面倒なので毎回実行の度に出力しちゃう
 				},
 				
 				/** 現在の計算結果をメモに出力 */
