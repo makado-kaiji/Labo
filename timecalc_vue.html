@@ -77,7 +77,7 @@
 		<!-- 回復量 -->
 		<div>
 			<span>回復量　：</span>
-			<input type="number" v-model="numTargetValue" max="999" min="0" v-on:keypress="numTargetValueOnKeypress">
+			<input type="number" v-model="numTargetValue" max="999" min="0" v-on:keypress="numTargetValueOnKeypress" v-on:blur="hankaku2Zenkaku('numTargetValue',$event)">
 			<input type="button" id="btnTargetValue" value="変換" v-on:click="calcFromKaihukuryo">
 		</div>
 
@@ -412,6 +412,23 @@
 					// タイマー準備
 					this.timerSet = min * 60;
 					this.dispTimer();
+				},
+				
+				// TODO: 各入力のフォーカスアウト時に変換する
+				/** 全角→半角変換(英数字) 
+				 * https://www.yoheim.net/blog.php?q=20191101
+				 * @param {string} key 変換対象の変数名
+				 * @param {object} e イベントオブジェクト（入力値を取る）
+				 */
+				hankaku2Zenkaku(key, e) {
+					console.log(`[hankaku2Zenkaku] key = ${key}`)
+					console.log(e)
+					console.log(e.target.value)
+					const ret = e.target.value.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (s) {
+						return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+					})
+					console.log(`ret = ${ret}`)
+					// return ret
 				},
 
 				/** 計算結果表示 */
