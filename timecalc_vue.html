@@ -473,7 +473,15 @@
 
 					// 計算結果を表示した際、ここで「種別、回復量、到達時刻」をコピー出力？できる値を作っておく
 					let d = new Date();
-					this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name} ${this.numTargetValue}回復 ＠${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+
+					// 刀剣モードなら回復量は表示しない & nameではなくmodeで表示
+					if (this.timePattern.list[this.timePattern.selectIndex].name == '刀剣') {
+						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name} ${this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name} ＠${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+
+					} else {
+						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name} ${this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name} ${this.numTargetValue}回復 ＠${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+
+					}
 
 					// 以前はボタン押下でやってたが、面倒なので毎回実行の度に出力しちゃう
 					// ※ただしタイマー稼働からの呼出では出力しない
@@ -557,7 +565,7 @@
 						G = Math.round((C / 2) - (A / 2))
 					}
 					window.twttr.shareWin = window.open(
-						`http://twitter.com/intent/tweet?text=${encodeURIComponent(`${document.title}\n${document.URL}\n${this.memo}`)}`,
+						`http://twitter.com/intent/tweet?text=${encodeURIComponent(`${document.title}\n${document.URL}\n\n${this.memo}`)}`,
 						'', `left=${H},top=${G},width=${D},height=${A},personalbar=0,toolbar=0,scrollbars=1,resizable=1`);
 					E = F.createElement('script');
 					E.src = 'http://platform.twitter.com/bookmarklets/share.js?v=1';
