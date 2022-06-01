@@ -476,10 +476,10 @@
 
 					// 刀剣モードなら回復量は表示しない & nameではなくmodeで表示
 					if (this.timePattern.list[this.timePattern.selectIndex].name == '刀剣') {
-						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} ＠${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
 					} else {
-						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} ${this.numTargetValue}回復 ＠${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} ${this.numTargetValue}回復 by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
 					}
 
