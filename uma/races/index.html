@@ -73,8 +73,8 @@
 			<label>
 				<input type="checkbox" v-model="isDispEntryList">出走確認
 			</label>
-			<button @click="clearFilter">絞込クリア</button>
-			<button v-on:click="clearCache">キャッシュクリア</button>
+			<button @click="copy">tweet</button>
+			<button v-on:click="clearCache">reload</button>
 		</div>
 
 		<!-- データ部：解析できたら表示 -->
@@ -554,16 +554,6 @@
 					console.log('--------------------------------------------------')
 				},
 
-				/** 絞込クリア */
-				clearFilter(){
-					// 現在の this.searchKey.length 分だけ空文字リスト作って置き換え
-					debugger
-					const newInput = [...Array(this.searchKey.length)].map((_, i) => '')
-					this.searchKey = newInput
-
-					this.inputSearchKey() // 再検索
-				},
-
 				/** キャッシュを無視して再読込 */
 				clearCache() {
 					// 保存した？
@@ -578,6 +568,66 @@
 					})}`
 
 					location.href = url
+				},
+
+				/** 表示中の一覧をコピーする */
+				copy(){
+					const tempLine = '{{year}}年 {{month}}月 {{half}} {{grade}}\n{{name}}\n'
+					const list = []
+					for (let i = 0; i < this.tableView.length; i++) {
+						// 出走確認中 かつ 出走チェック無し → 対象外
+						if (this.isDispEntryList && !this.entryInput[i]) continue
+						list.push(tempLine
+							.split('{{year}}').join(this.tableView[i].year)
+							.split('{{month}}').join(this.tableView[i].month.toString().padStart(2, '0'))
+							.split('{{half}}').join(this.tableView[i].half.substr(2,2))
+							.split('{{grade}}').join(this.tableView[i].grade)
+							.split('{{name}}').join(this.tableView[i].name)
+						)
+					}
+
+					const copyVal = ('出走リスト\n\n' + list.join('\n'))
+					this.doCopy(copyVal)
+					this.doShareTweet(copyVal)
+				},
+
+				/** コピー実行(url+titleと同じ) */
+				doCopy(copyString){
+					window.getSelection().removeAllRanges();
+					var element = document.createElement("pre");
+					element.id = "copyArea";
+					document.querySelector("body").appendChild(element);
+					document.querySelector("#copyArea").innerHTML = copyString;
+					var range = document.createRange();
+					range.selectNode(document.querySelector("#copyArea"));
+					window.getSelection().addRange(range);
+					var result = document.execCommand("copy");
+					window.getSelection().removeAllRanges();
+					element.parentNode.removeChild(element);
+					console.log("copy: " + result);
+					console.log(copyString);
+				},
+
+				/** Twitter共有 */
+				doShareTweet(str) {
+					window.twttr = window.twttr || {};
+					var D = 550,
+						A = 450,
+						C = screen.height,
+						B = screen.width,
+						H = Math.round((B / 2) - (D / 2)),
+						G = 0,
+						F = document,
+						E;
+					if (C > A) {
+						G = Math.round((C / 2) - (A / 2))
+					}
+					window.twttr.shareWin = window.open(
+						`http://twitter.com/intent/tweet?text=${encodeURIComponent(str)}`,
+						'', `left=${H},top=${G},width=${D},height=${A},personalbar=0,toolbar=0,scrollbars=1,resizable=1`);
+					E = F.createElement('script');
+					E.src = 'http://platform.twitter.com/bookmarklets/share.js?v=1';
+					F.getElementsByTagName('head')[0].appendChild(E)
 				},
 			},
 		})
