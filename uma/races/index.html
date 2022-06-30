@@ -577,7 +577,7 @@
 					const list = []
 					for (let i = 0; i < this.tableView.length; i++) {
 						// 出走確認中 かつ 出走チェック無し → 対象外
-						if (this.isDispEntryList && !this.entryInput[i]) continue
+						if (this.isDispEntryList && this.entryInput[i] != true) continue
 						list.push(tempLine
 							.split('{{year}}').join(this.tableView[i].year)
 							.split('{{month}}').join(this.tableView[i].month.toString().padStart(2, '0'))
