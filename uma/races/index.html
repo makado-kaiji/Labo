@@ -73,6 +73,7 @@
 			<label>
 				<input type="checkbox" v-model="isDispEntryList">出走確認
 			</label>
+			<button @click="clearFilter">絞込クリア</button>
 			<button v-on:click="clearCache">キャッシュクリア</button>
 		</div>
 
@@ -551,6 +552,16 @@
 					})
 
 					console.log('--------------------------------------------------')
+				},
+
+				/** 絞込クリア */
+				clearFilter(){
+					// 現在の this.searchKey.length 分だけ空文字リスト作って置き換え
+					debugger
+					const newInput = [...Array(this.searchKey.length)].map((_, i) => '')
+					this.searchKey = newInput
+
+					this.inputSearchKey() // 再検索
 				},
 
 				/** キャッシュを無視して再読込 */
