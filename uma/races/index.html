@@ -73,6 +73,7 @@
 			<label>
 				<input type="checkbox" v-model="isDispEntryList">出走確認
 			</label>
+			<button @click="clearFilter">clear</button>
 			<button @click="copy(false)">copy</button>
 			<button @click="copy(true)">tweet</button>
 			<button v-on:click="clearCache">reload</button>
@@ -571,6 +572,15 @@
 					location.href = url
 				},
 
+				/** 絞込クリア */
+				clearFilter() {
+					// 現在の this.searchKey.length 分だけ空文字リスト作って置き換え
+					const newInput = [...Array(this.searchKey.length)].map((_, i) => '')
+					this.searchKey = newInput
+
+					this.inputSearchKey() // 再検索
+				},
+				
 				/** 表示中の一覧をコピーする */
 				copy(isTweet){
 					const tempLine = '{{year}}年 {{month}}月 {{half}} {{grade}}\n{{name}}\n'
