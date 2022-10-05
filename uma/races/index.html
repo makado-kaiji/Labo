@@ -56,11 +56,15 @@
 				<br>
 				コンソールから以下を実行
 				<br>
+				<code>
 				let json = JSON.parse( $('.article-wrap > script[type="application/ld+json"]').html());
 				<br>
 				console.log(JSON.stringify(json));
+				</code>
 				<br>
 				出てきたjsonをjson.jsにコピペしました。
+				<br>
+				※最後のレースのturn列がおかしくなる場合はarticleBody最末尾の不要な文字列を削除すること
 			</div>
 		</details>
 
