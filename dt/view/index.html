@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+	
+	<link rel="shortcut icon" href="../img/favicon.png">
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+	<link href="../css/common.css" rel="stylesheet">
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<v-app>
+
+			<v-main>
+				<v-container>
+					<v-row>
+						<v-col cols="4">Hello world</v-col>
+						<v-col cols="4">
+							<v-btn text color="primary" href="https://vuetifyjs.com/ja/getting-started/installation/#cdn-3067306e4f7f7528" target="_blank">CDNでの利用</v-btn>
+						</v-col>
+						<v-col cols="4">
+							<v-btn text color="primary" href="https://codepen.io/pen?template=OJJeVge" target="_blank">Vuetify starter</v-btn>
+						</v-col>
+					</v-row>
+					<v-row>
+						<v-col>
+							<p>mdi-test</p>
+							<v-btn fab color="error">
+								<v-icon>mdi-alert</v-icon>
+							</v-btn>
+						</v-col>
+					</v-row>
+
+					<div style="text-align: right;">
+						<v-btn x-small depressed color="white" @click="changeDebugMode">
+							<span class="white--text">{{ (common.isDebug ? 'ON' : 'OFF') }}[{{common.debugCount}}]</span>
+						</v-btn>
+					</div>
+					<div v-show="common.isDebug" style="word-break: break-all;">
+						isDebug<br>lastModified: {{common.lastModified}}<br>{{common.URL.href}}<br>
+					</div>
+				</v-container>
+			</v-main>
+
+		</v-app>
+	</div>
+
+	<script src="../js/mixins.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+	<script src="../js/lib/httpVueLoader@1.4.2.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+	<script>
+		const vm = new Vue({
+			el: '#app',
+			vuetify: new Vuetify(),
+			mixins:[myMixins],
+			data() {
+				return {
+					test:'1',
+				}
+			},
+			mounted(){
+				console.log(`${(new Date()).toLocaleString()} ${(new Date()).getTime()} [index] mounted`)
+			},
+			methods: {
+				
+			},
+		})
+	</script>
+</body>
+
+</html>
