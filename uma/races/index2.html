@@ -105,6 +105,8 @@
 						</v-row>
 						<v-row dense>
 							<v-col cols="12" class="pt-3">
+								<!-- TODO fixed-header="true" が効いてない
+								https://vuetifyjs.com/ja/api/v-data-table/#props -->
 								<v-data-table
 									:headers="headers" :items="tableView" :items-per-page="100"
 									dense class=""
@@ -116,6 +118,7 @@
 									no-data-text="データがありません。"
 									mobile-breakpoint="0"
 									:search="search"
+									:fixed-header="true"
 								>
 									<!-- データ部のカスタマイズ
 									これをやるとスマホでもテーブル形式になる
