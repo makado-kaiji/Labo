@@ -93,48 +93,58 @@
 					</v-row>
 
 					<!-- データ部：解析できたら表示 -->
-					<template v-if="tableView.length > 0"></template>
-					<v-row><v-col cols="12" class="pb-0">{{isDispEntryList ? entryInput.filter(x=>x==true)?.length : tableView.length}} 件 / {{table.length}}件中</v-col></v-row>
-					<v-row>
-						<v-col cols="12" class="pb-0">
-							<v-text-field v-model="search"
-								append-icon="mdi-magnify" label="キーワード"
-								sort-by-text="ソート順"
-								:footer-props="{
-									itemsPerPageAllText: '全て',
-									itemsPerPageText: '表示件数:',
-								}"
-								no-data-text="データがありません。"
-								mobile-breakpoint="0"
-								dense outlined hide-details clearable
-							></v-text-field>
-						</v-col>
-					</v-row>
-					<v-row>
-						<v-col cols="12">
-							<v-data-table
-								:headers="headers" :items="tableView" :items-per-page="100"
-								dense class=""
-								:search="search"
-							>
-								<template v-slot:item.entry="{ item }">
-									<v-checkbox v-model="item.entry" hide-details dense class="pa-0 ma-0"></v-checkbox>
-								</template>
-								<template v-slot:item.grade="{ item }">
-									<v-chip
-										:color="getGradeColor(item.grade)"
-										dark x-small
-									>
-										{{ item.grade }}
-									</v-chip>
-								</template>
-							</v-data-table>
-						</v-col>
-					</v-row>
+					<template v-if="tableView.length > 0">
+						<v-row dense><v-col>{{isDispEntryList ? entryInput.filter(x=>x==true)?.length : tableView.length}} 件 / {{table.length}}件中</v-col></v-row>
+						<v-row dense>
+							<v-col cols="12" class="pb-0">
+								<v-text-field v-model="search"
+									append-icon="mdi-magnify" label="キーワード"
+									sort-by-text="ソート順"
+									:footer-props="{
+										itemsPerPageAllText: '全て',
+										itemsPerPageText: '表示件数:',
+									}"
+									no-data-text="データがありません。"
+									mobile-breakpoint="0"
+									dense outlined hide-details clearable
+								></v-text-field>
+							</v-col>
+						</v-row>
+						<v-row dense>
+							<v-col cols="12" class="pt-3">
+								<v-data-table
+									:headers="headers" :items="tableView" :items-per-page="100"
+									dense class=""
+									:search="search"
+								>
+									<!-- データ部のカスタマイズ
+									これをやるとスマホでもテーブル形式になる
+									v-row>v-colではダメ。tr>tdである必要がある -->
+									<template v-slot:item="{ item, itemIndex }">
+										<tr class="aic">
+											<!--  :data-grade="key == 'grade' ? item[key] : null" -->
+											<td v-for="key in Object.keys(item)" :key="`col-${key}-${itemIndex}`" class="px-1 text-caption" :data-grade="key == 'grade' ? '' : null">
+												<template v-if="key == 'entry'">
+													<v-checkbox v-model="item.entry" hide-details dense class="pa-0 ma-0"></v-checkbox>
+												</template>
+												<template v-else-if="key == 'grade'">
+													<v-chip
+														:color="getGradeColor(item.grade)"
+														dark x-small
+													>{{ item.grade }}</v-chip>
+												</template>
+												<template v-else>{{item[key]}}</template>
+											</td>
+										</tr>
+									</template>
+								</v-data-table>
+							</v-col>
+						</v-row>
+					</template>
 
 					<!-- 最終更新日時 -->
-					<v-row>
-						<v-col>Last Update: </v-col>
+					<v-row dense>
+						<v-col cols="auto">Last Update: </v-col>
 						<v-col>{{ common.lastModified }}</v-col>
 					</v-row>
 
@@ -289,7 +299,7 @@
 							value: 'half',
 						},
 						{
-							text: 'グレード',
+							text: 'ｸﾞﾚｰﾄﾞ',
 							align: 'center',
 							sortable: true,
 							value: 'grade',
@@ -301,13 +311,13 @@
 							value: 'name',
 						},
 						{
-							text: 'クラス',
+							text: 'ｸﾗｽ',
 							align: 'start',
 							sortable: true,
 							value: 'className',
 						},
 						{
-							text: 'バ場',
+							text: 'ﾊﾞ場',
 							align: 'start',
 							sortable: true,
 							value: 'field',
@@ -454,6 +464,7 @@
 					// ソート完了→sortNum以外をtableに格納
 					sortList.forEach((v,i)=>{
 						this.table.push({
+							entry:false,
 							index:i,
 							year: v.year,
 							month: v.month,
