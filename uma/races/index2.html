@@ -70,11 +70,11 @@
 					<!-- ボタンエリア -->
 					<v-row dense class="aic">
 						<v-col cols="auto">
-							<v-btn x-small color="primary" @click="exec">初期化</v-btn>
+							<v-btn x-small color="primary" @click="exec">exec</v-btn>
 						</v-col>
-						<v-col cols="auto">
+						<!-- <v-col cols="auto">
 							<v-btn x-small color="primary" @click="clearFilter">clear</v-btn>
-						</v-col>
+						</v-col> -->
 						<v-col cols="auto">
 							<v-btn x-small color="primary" @click="copy(false)">copy</v-btn>
 						</v-col>
@@ -121,9 +121,16 @@
 									これをやるとスマホでもテーブル形式になる
 									v-row>v-colではダメ。tr>tdである必要がある -->
 									<template v-slot:item="{ item, itemIndex }">
-										<tr class="aic">
+										<tr class="aic"
+										:data-half="item.half=='後' ? 2 : 1"
+										:data-checked="item.entry===true">
 											<!--  :data-grade="key == 'grade' ? item[key] : null" -->
-											<td v-for="key in Object.keys(item)" :key="`col-${key}-${itemIndex}`" class="px-1 text-caption" :data-grade="key == 'grade' ? '' : null">
+											<td
+												v-for="key in Object.keys(item)" :key="`col-${key}-${itemIndex}`"
+												class="px-1 text-caption"
+												:data-grade="key == 'grade' ? '' : null"
+												
+											>
 												<template v-if="key == 'entry'">
 													<v-checkbox v-model="item.entry" hide-details dense class="pa-0 ma-0"></v-checkbox>
 												</template>
@@ -798,20 +805,20 @@
 		}
 
 		/* 出走選択行は太字にする */
-		[data-checked="true"] {
-			font-weight: bold;
+		[data-checked="true"],
+		[data-checked="true"] > td {
+			font-weight: bold !important;
 		}
 
 		/* レース階級 */
-		[data-grade] {
-			text-align: center;
-			color: #fff;
-		}
+		[data-grade] { text-align: center; }
 		[data-grade="G1"] { background-color: #4b82dc; }
 		[data-grade="G2"] { background-color: #f35482; }
 		[data-grade="G3"] { background-color: #37bc55; }
 		[data-grade="OP"] { background-color: #fda903; }
 		[data-grade="Pre-OP"] { background-color: #fda903; }
+
+		button.v-btn {text-transform: none}
 	</style>
 </body>
 </html>
