@@ -99,13 +99,6 @@
 							<v-col cols="12" class="pb-0">
 								<v-text-field v-model="search"
 									append-icon="mdi-magnify" label="キーワード"
-									sort-by-text="ソート順"
-									:footer-props="{
-										itemsPerPageAllText: '全て',
-										itemsPerPageText: '表示件数:',
-									}"
-									no-data-text="データがありません。"
-									mobile-breakpoint="0"
 									dense outlined hide-details clearable
 								></v-text-field>
 							</v-col>
@@ -115,6 +108,13 @@
 								<v-data-table
 									:headers="headers" :items="tableView" :items-per-page="100"
 									dense class=""
+									sort-by-text="ソート順"
+									:footer-props="{
+										itemsPerPageAllText: '全て',
+										itemsPerPageText: '表示件数:',
+									}"
+									no-data-text="データがありません。"
+									mobile-breakpoint="0"
 									:search="search"
 								>
 									<!-- データ部のカスタマイズ
