@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>vue3test</title>
+
+	<!-- mdi -->
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@mdi/font@6.9.96/css/materialdesignicons.min.css">
+
+	<!-- font -->
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+
+	<!-- vue 2x
+		https://vuetifyjs.com/ja/getting-started/installation/#cdn-3067306e4f7f7528
+	https://jp.vuejs.org/v2/guide/installation.html#CDN -->
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+
+	<!-- vue loader 2x
+	https://github.com/FranckFreiburger/http-vue-loader -->
+	<script src="https://unpkg.com/http-vue-loader"></script>
+
+	<!-- vuetify 2x
+	https://vuetifyjs.com/ja/getting-started/installation/#cdn-3067306e4f7f7528 -->
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+
+	<!-- jquery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+	<!-- app common -->
+	<script src="./mixins.js"></script>
+
+	<!-- app html -->
+	<script src="json.js"></script>
+</head>
+<body>
+	<div id="app" v-cloak>
+		<v-app>
+			<v-main>
+				<v-container>
+
+					<!-- 折りたたみ説明 -->
+					<v-row>
+						<v-col>
+							<v-expansion-panels dense outline>
+								<v-expansion-panel>
+									<v-expansion-panel-header>データについて</v-expansion-panel-header>
+									<v-expansion-panel-content>
+										<a href="https://gamewith.jp/uma-musume/article/show/258835" target="_blank">【ウマ娘】レース一覧 - ゲームウィズ</a> 様のデータをお借りしています。
+										<br>
+										コンソールから以下を実行
+										<br>
+										<code>
+										let json = JSON.parse( $('.article-wrap > script[type="application/ld+json"]').html());
+										<br>
+										console.log(JSON.stringify(json));
+										</code>
+										<br>
+										出てきたjsonをjson.jsにコピペしました。
+										<br>
+										※最後のレースのturn列がおかしくなる場合はarticleBody最末尾の不要な文字列を削除すること
+										</v-expansion-panel-content>
+								</v-expansion-panel>
+							</v-expansion-panels>
+						</v-col>
+					</v-row>
+
+					<!-- ボタンエリア -->
+					<v-row dense class="aic">
+						<v-col cols="auto">
+							<v-btn x-small color="primary" @click="exec">初期化</v-btn>
+						</v-col>
+						<v-col cols="auto">
+							<v-btn x-small color="primary" @click="clearFilter">clear</v-btn>
+						</v-col>
+						<v-col cols="auto">
+							<v-btn x-small color="primary" @click="copy(false)">copy</v-btn>
+						</v-col>
+						<v-col cols="auto">
+							<v-btn x-small color="primary" @click="copy(true)">tweet</v-btn>
+						</v-col>
+						<v-col cols="auto">
+							<v-btn x-small color="primary" @click="clearCache">reload</v-btn>
+						</v-col>
+						<!-- <v-col>
+							<v-checkbox v-model="isBakusinMode" color="primary" density="compact" class="pa-0 ma-0" hide-details label="バクシン" @change="bakusin"></v-checkbox>
+						</v-col> -->
+						<v-col cols="auto">
+							<v-checkbox v-model="isDispEntryList" color="primary" dense class="pa-0 ma-0" hide-details label="出走" @change="checkEntry"></v-checkbox>
+						</v-col>
+					</v-row>
+
+					<!-- データ部：解析できたら表示 -->
+					<template v-if="tableView.length > 0"></template>
+					<v-row><v-col cols="12" class="pb-0">{{isDispEntryList ? entryInput.filter(x=>x==true)?.length : tableView.length}} 件 / {{table.length}}件中</v-col></v-row>
+					<v-row>
+						<v-col cols="12" class="pb-0">
+							<v-text-field v-model="search"
+								append-icon="mdi-magnify" label="キーワード"
+								sort-by-text="ソート順"
+								:footer-props="{
+									itemsPerPageAllText: '全て',
+									itemsPerPageText: '表示件数:',
+								}"
+								no-data-text="データがありません。"
+								mobile-breakpoint="0"
+								dense outlined hide-details clearable
+							></v-text-field>
+						</v-col>
+					</v-row>
+					<v-row>
+						<v-col cols="12">
+							<v-data-table
+								:headers="headers" :items="tableView" :items-per-page="100"
+								dense class=""
+								:search="search"
+							>
+								<template v-slot:item.entry="{ item }">
+									<v-checkbox v-model="item.entry" hide-details dense class="pa-0 ma-0"></v-checkbox>
+								</template>
+								<template v-slot:item.grade="{ item }">
+									<v-chip
+										:color="getGradeColor(item.grade)"
+										dark x-small
+									>
+										{{ item.grade }}
+									</v-chip>
+								</template>
+							</v-data-table>
+						</v-col>
+					</v-row>
+
+					<!-- 最終更新日時 -->
+					<v-row>
+						<v-col>Last Update: </v-col>
+						<v-col>{{ common.lastModified }}</v-col>
+					</v-row>
+
+				</v-container>
+			</v-main>
+		</v-app>
+	</div>
+
+	<script>
+		const app = new Vue({
+			el:'#app',
+			mixins:[myMixins],
+			vuetify: new Vuetify(),
+			data() {
+				return {
+					lastModified:'',
+
+					articleBody:[], // jsonから整形する一次配列
+					search:'',
+					headers: [], // データテーブルのヘッダー
+					searchKey: '', // 検索用キーワード（各列ごと）
+					table: [], // データテーブル
+					tableView: [], // データテーブル（検索結果）
+
+					entryInput:[], // 出走チェック（各行分）
+					entryDisabled:[], // 出走チェックリストの非活性フラグ
+					isDispEntryList: false, // 出走チェックONのみ表示中かどうか
+
+					// バクシン目標レース
+					bakusinRace:[
+						{
+							name:'京王杯ジュニアステークス',
+							year:1,
+							month:11,
+							half:1,
+							index:-1, // tableのindex（後でセットする）
+						},
+						{
+							name: 'スプリングステークス',
+							year: 2,
+							month: 3,
+							half: 2,
+							index: -1,
+						},
+						{
+							name: '葵ステークス',
+							year: 2,
+							month: 5,
+							half: 2,
+							index: -1,
+						},
+						{
+							name: 'スプリンターズステークス',
+							year: 2,
+							month: 9,
+							half: 2,
+							index: -1,
+						},
+						{
+							name: '高松宮記念',
+							year: 3,
+							month: 3,
+							half: 2,
+							index: -1,
+						},
+						{
+							name: '函館スプリントステークス',
+							year: 3,
+							month: 6,
+							half: 2,
+							index: -1,
+						},
+						{
+							name: 'CBC賞',
+							year: 3,
+							month: 7,
+							half: 1,
+							index: -1,
+						},
+						{
+							name: 'セントウルステークス',
+							year: 3,
+							month: 9,
+							half: 1,
+							index: -1,
+						},
+						{
+							name: 'スプリンターズステークス',
+							year: 3,
+							month: 9,
+							half: 2,
+							index: -1,
+						},
+						{
+							name: 'マイルチャンピオンシップ',
+							year: 3,
+							month: 11,
+							half: 2,
+							index: -1,
+						},
+					],
+
+					isBakusinMode: false, // バクシン絞込フラグ
+				}
+			},
+			mounted() {
+				this.exec()
+			},
+			methods: {
+				/** 読込実行 */
+				exec () {
+					// 一旦全てクリア
+					this.isBakusinMode = false;
+					this.isDispEntryList = false;
+					this.headers = [];
+					let sortList = []; // ソート完了するまでの一時データ
+					this.table = []; // 全件データ
+					this.tableView = []; // ソート・絞込結果データ（これが一覧表示される）
+
+					// console.log(json);
+
+					// ヘッダー定義（8分割後のtable格納と揃える）
+					this.headers = [
+						{
+							text: '出',
+							align: 'start',
+							sortable: true,
+							value: 'entry',
+						},
+						{
+							text: '#',
+							align: 'start',
+							sortable: true,
+							value: 'index',
+						},
+						{
+							text: '年',
+							align: 'start',
+							sortable: true,
+							value: 'year',
+						},
+						{
+							text: '月',
+							align: 'start',
+							sortable: true,
+							value: 'month',
+						},
+						{
+							text: '半',
+							align: 'start',
+							sortable: true,
+							value: 'half',
+						},
+						{
+							text: 'グレード',
+							align: 'center',
+							sortable: true,
+							value: 'grade',
+						},
+						{
+							text: '名前',
+							align: 'start',
+							sortable: true,
+							value: 'name',
+						},
+						{
+							text: 'クラス',
+							align: 'start',
+							sortable: true,
+							value: 'className',
+						},
+						{
+							text: 'バ場',
+							align: 'start',
+							sortable: true,
+							value: 'field',
+						},
+						{
+							text: 'm',
+							align: 'start',
+							sortable: true,
+							value: 'meter',
+						},
+						{
+							text: '距離',
+							align: 'start',
+							sortable: true,
+							value: 'meterName',
+						},
+						{
+							text: '回',
+							align: 'start',
+							sortable: true,
+							value: 'turn',
+						},
+					]
+
+					// ヘッダー分だけ検索キー配列を空文字で作っておく
+					// this.searchKey = [...Array(this.headers.length)].map((_, i) => '');
+					
+					this.articleBody = json.articleBody.split('レース詳細')[1].split('&rarr;')[0].split('年目 ');
+					// console.log(this.articleBody);
+
+					// 「年目 」で区切ると、一つ前の末尾の数字(1,2,3)が自分の行のデータになっているので再整形
+					let lastStr = ''; // 末尾1文字（前に取っておいて後で先頭に追加する）
+					for (let i = 0; i < this.articleBody.length; i++) {
+
+						// index[0]は「1」のみ（1件目の「1年目 」を分割した結果）
+						if (i == 0) {
+							// 自分行の末尾1文字を保存しておく
+							lastStr = this.articleBody[i].substr(-1, 1);
+							continue;
+						}
+
+						// 解析対象行：index[1]～最後まで
+						// console.log(`[${i}] ${this.articleBody[i]}`);
+						
+						// 保存しておいた1つ前の末尾1文字を取ってきて自分行の先頭に追加
+						this.articleBody[i] = lastStr + '年目 / ' + this.articleBody[i];
+						
+						// 自分行の末尾1文字を保存しておく
+						lastStr = this.articleBody[i].substr(-1, 1);
+
+						// 自分行の末尾が数字(1,2,3)でない → 最終行
+						if (lastStr != '1' && lastStr != '2' && lastStr != '3') {
+							// console.log(`lastStr: ${lastStr}`);
+						}
+
+						// 自分行の末尾1文字を削る
+						this.articleBody[i] = this.articleBody[i].slice(0, -1);
+
+						// 「X月前半」か「X月後半」が必ず入っているので分割
+						// 「半」で分割するとレース名などに引っかかりそうなのでやめておく
+						this.articleBody[i] = this.articleBody[i].split('月前半').join('月前半 / ').split('月後半').join('月後半 / ');
+
+						// この時点でこんな感じ
+						// 1年目 / 7月後半 / 中京ジュニアステークスジュニア / OP / 中京芝 / 1600m(マイル) / 左
+						// 「 / 」区切りで
+						// 年数、時期、レース名＋階級、グレード、バ場、方向
+						// 「レース名＋階級」は、レース名自体に「ジュニア」などが入っているので分割に注意
+
+						// 一旦現時点で分割 → 「レース名＋階級」のみ再分割
+						let td = this.articleBody[i].split(' / ');
+
+						// 末尾8文字を取ればどれかの階級は入っているはず
+						let className = td[2].substr(-8);
+						// console.log(`[${i}]${className} ${this.articleBody[i]}`);
+
+						if (className == 'クラシックシニア') {
+								// 2年目, 3年目に同じレースがある場合はこれになっている
+								// 自分行の「年数」で判断して削る
+								className = td[0] == '2年目' ? 'クラシック' : 'シニア';
+						}
+
+						// 再分割
+						if (td[2].includes('ジュニア')) {
+							td[2] = this.formatRaceName(td[2], 'ジュニア') + ' / ジュニア';
+
+						} else if (td[2].includes('クラシック')) {
+							td[2] = this.formatRaceName(td[2], 'クラシック') + ' / クラシック';
+
+						} else if (td[2].includes('シニア')) {
+							td[2] = this.formatRaceName(td[2], 'シニア') + ' / シニア';
+
+						} else {
+							// 基本的に想定外、↑のどれかに入るはず
+							console.log(`td[2] 想定外: ${td[2]}`);
+						}
+
+						// 再分割が終わったら全結合→最終分割
+						td = td.join(' / ').split(' / ');
+
+						// 8分割できたら成功
+						if (td.length == 8) {
+							// console.log(td);
+
+							// 更に細々と分割
+							const addRow = {
+								entry: false, // 初回は出走無し
+								year: Number(td[0].split('年目')[0]),
+								month: Number(td[1].split('月')[0]),
+								// (td[1].split('月')[1].includes('前') ? '1:' : '2:') + td[1].split('月')[1], // 1:前半、2:後半
+								half: td[1].split('月')[1][0], // 前/後
+								grade: td[4],
+								name: td[2],
+								className: td[3],
+								field: td[5],
+								meter: Number(td[6].split('m(')[0]),
+								meterName: td[6].split('m(')[1].split(')')[0],
+								turn: td[7],
+							};
+
+							// レース階級を数値化（G1=1,G2=2,G3=3,OP=4,Pre-OP=5)
+							const gradeCode = addRow.grade.includes('G')
+								? Number(addRow.grade.substr(1, 1))
+								: addRow.grade.includes('Pre') ? 5 : 4;
+
+							// 年、月、前半後半、レース階級、距離をまとめて一つの数値化する（月、前半後半はゼロ埋め2桁）
+							addRow.sortNum = Number(addRow.year.toString() + addRow.month.toString().padStart(2, '0')+ addRow.half.substr(0, 1) + gradeCode + addRow.meter.toString());
+
+							// テーブルデータに格納
+							sortList.push(addRow);
+
+						}
+
+					}
+
+					// console.log(`before:\n${JSON.stringify(sortList)}`);
+					
+					// 年、月、前半後半、レース階級、距離で昇順ソート
+					sortList = sortList.sort((a,b)=>{
+						return a.sortNum - b.sortNum;
+					});
+
+					// console.log(`after:\n${JSON.stringify(sortList)}`);
+
+					// ソート完了→sortNum以外をtableに格納
+					sortList.forEach((v,i)=>{
+						this.table.push({
+							index:i,
+							year: v.year,
+							month: v.month,
+							half: v.half,
+							grade: v.grade,
+							name: v.name,
+							className: v.className,
+							field: v.field,
+							meter: v.meter,
+							meterName: v.meterName,
+							turn: v.turn,
+						});
+
+						// バクシン目標レースかどうか→合致したらバクシン目標レース定義の方のindexを設定
+						const isBakusin = this.bakusinRace.findIndex(b => b.year == v.year && b.month == v.month && v.half.includes(b.half) && b.name == v.name);
+						if (isBakusin > -1) {
+							this.bakusinRace[isBakusin].index = i;
+						}
+					});
+					
+					// 行分だけ出走チェックリストを作っておく
+					this.entryInput = [...Array(this.table.length)].map((_, i) => false);
+					
+					// 行分だけ出走チェックリストの非活性フラグを作っておく
+					this.entryDisabled = [...Array(this.table.length)].map((_, i) => false);
+
+					// データテーブル（検索結果）に反映
+					this.tableView = this.table;
+
+					// 最後まで整形し切ったら、先頭の「1」だけの配列は不要になるので削除
+					// this.articleBody.shift();
+				},
+
+				/** 「レース名＋階級」を分割してレース名だけにする
+				 * @param {string} str レース名＋階級
+				 * @param {string} cl 階級
+				 * @return {string} 階級を除いたレース名
+				 */
+				formatRaceName (str, cl) {
+					// 階級で分割
+					const l = str.split(cl);
+
+					if (l.length == 2) {
+						// 分割結果が2：1番目がそのままレース名
+						return l[0];
+
+					} else if (l.length == 3) {
+						// 分割結果が3：1番目, 2番目の間に階級を挟んで返す
+						return l[0] + cl + l[1];
+
+					} else {
+						// 上記以外：レース名に階級が複数回入るとは考えにくい
+						// 基本的に想定外とする
+						console.log(`[formatRaceName]想定外: str = ${str}, cl = ${cl}`);
+						return str; // とりあえず何もせず返す
+					}
+				},
+
+				/** 列名に合わせて検索窓の幅を設定する
+				 * @param {string} th header名
+				 * @return {string} 幅指定
+				 */
+				GetInputWidth(th) {
+
+					// 基本的にはheader名の文字数分 / 2(半角なので) + 1(余裕)
+					let w = (th.length / 2) + 1;
+
+					// 特殊だけ別指定
+					switch (th) {
+						case 'name':
+							w = 20;
+							break;
+						case 'field':
+						case 'meterName':
+							w++;
+							break;
+					}
+					return 'width: ' + w + 'em;';
+				},
+
+				/** 入力値から検索する */
+				inputSearchKey() {
+					const searchKeys = [];
+					this.searchKey.forEach((v, i) => {
+						// 入力なしならスキップ
+						if (!v || v.length == 0) return;
+
+						searchKeys.push({
+							index: i,
+							colName: this.headers[i], // 入力に対応する列名を取得
+							key: v,
+						})
+					})
+
+					// 検索条件が0件なら全件表示して終了
+					if (searchKeys.length == 0) {
+						this.tableView = this.table;
+						return;
+					}
+
+					// 全ての条件を含む列のみ抽出(大文字小文字を考慮しない)
+					this.tableView = this.table.filter(x => {
+						searchKeys.forEach((v, i) => {
+							v.isMatch = x[v.colName].toString().toLowerCase().includes(v.key.toString().toLowerCase());
+						})
+						return searchKeys.length == searchKeys.filter(y => y.isMatch)?.length;
+					})
+				},
+				
+				/** バクシン金策モード */
+				bakusin () {
+					// 一旦リセット
+					this.tableView = [];
+
+					if (this.isBakusinMode) {
+						// バクシンON
+						this.table.forEach((x, i) => {
+							// まずG3以上＆芝＆短距離・マイルで絞込
+							let target = {};
+							if (x.grade.includes('G') && x.field.includes('芝') && (x.meterName.includes('短距離') || x.meterName.includes('マイル'))) {
+								target = JSON.parse(JSON.stringify(x));
+							} else {
+								return; // 対象外
+							}
+
+							// バクシン目標リストと突き合わせ
+							// 年、月、前半後半が一致、かつ名称は不一致→目標レース時の他レースなので除外
+							const isBakusin = this.bakusinRace.find(b => b.year == target.year && b.month == target.month && target.half.includes(b.half));
+
+							if (isBakusin) {
+								if (isBakusin.name == target.name) {
+									// 目標レース→表示追加、チェックON＆非活性（外させないため）
+									this.tableView.push(target);
+									this.entryInput[target.index] = true;
+									this.entryDisabled[target.index] = true;
+								} else {
+									// 同時期に目標レースがある別レース→除外
+									console.log(`同時期目標除外：${JSON.stringify(target)}`);
+								}
+							} else {
+								// それ以外→表示追加
+								this.tableView.push(target);
+							}
+						});
+					} else {
+						// バクシンOFF
+						// 全件表示
+						this.tableView = this.table;
+						this.bakusinRace.forEach((v,i)=>{
+							// 目標レースのチェックONが外せないようになっているので、非活性をOFF
+							this.entryDisabled[v.index] = false;
+							// 目標レースと同時期のレースが非活性になっていないので、ON
+							this.checkEntry(v.index)
+						})
+					}
+				},
+
+				/** 出走確認
+				 * @param {boolean} isShow true: これから表示したい / false:これから非表示にしたい
+				 */
+				checkEntry(isShow) {
+					console.log(`${(new Date()).toLocaleString()} ${(new Date()).getTime()} [checkEntry] start:${isShow}`)
+
+					// true:絞り込み開始
+					if (isShow) {
+						this.tableView = this.tableView.filter(x => x.entry === true)
+					}
+					// false:絞り込み終了(検索キーワードとバクシンのことは一旦考えない)
+					else{
+						this.tableView = JSON.parse(JSON.stringify(this.table))
+					}
+					return
+					// 選択行
+					const selRow = this.table[trIndex];
+					//console.log(`selRow = ${JSON.stringify(selRow)}`);
+
+					// 選択行以外の、選択行と同じ年、月、前半後半の出走チェック活性を切り替える(選択行のチェック状態に応じて)
+					this.table.forEach((v,i)=>{
+						if (i != trIndex && v.year == selRow.year && v.month == selRow.month && v.half == selRow.half) {
+							this.entryDisabled[i] = this.entryInput[trIndex]
+						}
+					});
+
+					// TODO: ３連続出走の警告表示追加（ただしバクシン中の場合は目標レースを考慮）
+					let entryInputTable = [];
+					this.entryInput.forEach((v,i)=>{
+						if (!v) return; // チェックOFFは抜ける
+
+						//console.log(`v=${v}, i=${i} @${(new Date()).getTime()}`);
+						entryInputTable.push(this.table[i])
+					});
+					entryInputTable.forEach((v,i)=>{
+						// 自分の前2つもチェックONなら3連続出走
+
+					})
+
+					console.log('--------------------------------------------------')
+				},
+
+				/** キャッシュを無視して再読込 */
+				clearCache() {
+					// 保存した？
+					if (!confirm('画面を再読み込みします。\r\n※保存していない内容はリセットされます')) return;
+
+					// 既にQueryが付いていた場合は削除
+					let url = location.href.replace(location.search, '')
+
+					// キャッシュ無視パラメーターを作成して画面遷移
+					url += `?${new URLSearchParams({
+						_: (new Date()).getTime()
+					})}`
+
+					location.href = url
+				},
+
+				/** 絞込クリア */
+				clearFilter() {
+					// 現在の this.searchKey.length 分だけ空文字リスト作って置き換え
+					const newInput = [...Array(this.searchKey.length)].map((_, i) => '')
+					this.searchKey = newInput
+
+					this.inputSearchKey() // 再検索
+				},
+				
+				/** 表示中の一覧をコピーする */
+				copy(isTweet){
+					const tempLine = '{{year}}年 {{month}}月 {{half}} {{grade}}\n{{name}}\n'
+					const list = []
+					for (let i = 0; i < this.tableView.length; i++) {
+						// 出走確認中 かつ 出走チェック無し → 対象外
+						if (this.isDispEntryList && this.tableView[i].entry != true) continue
+						list.push(tempLine
+							.split('{{year}}').join(this.tableView[i].year)
+							.split('{{month}}').join(this.tableView[i].month.toString().padStart(2, '0'))
+							.split('{{half}}').join(this.tableView[i].half.substr(2,2))
+							.split('{{grade}}').join(this.tableView[i].grade)
+							.split('{{name}}').join(this.tableView[i].name)
+						)
+					}
+
+					const copyVal = ('出走リスト\n\n' + list.join('\n'))
+					this.doCopy(copyVal)
+					if (isTweet) {
+						this.doShareTweet(copyVal)
+					}
+				},
+
+				/** コピー実行(url+titleと同じ) */
+				doCopy(copyString){
+					window.getSelection().removeAllRanges();
+					var element = document.createElement("pre");
+					element.id = "copyArea";
+					document.querySelector("body").appendChild(element);
+					document.querySelector("#copyArea").innerHTML = copyString;
+					var range = document.createRange();
+					range.selectNode(document.querySelector("#copyArea"));
+					window.getSelection().addRange(range);
+					var result = document.execCommand("copy");
+					window.getSelection().removeAllRanges();
+					element.parentNode.removeChild(element);
+					console.log("copy: " + result);
+					console.log(copyString);
+				},
+
+				/** Twitter共有 */
+				doShareTweet(str) {
+					window.twttr = window.twttr || {};
+					var D = 550,
+						A = 450,
+						C = screen.height,
+						B = screen.width,
+						H = Math.round((B / 2) - (D / 2)),
+						G = 0,
+						F = document,
+						E;
+					if (C > A) {
+						G = Math.round((C / 2) - (A / 2))
+					}
+					window.twttr.shareWin = window.open(
+						`https://twitter.com/intent/tweet?text=${encodeURIComponent(str)}`,
+						'', `left=${H},top=${G},width=${D},height=${A},personalbar=0,toolbar=0,scrollbars=1,resizable=1`);
+					E = F.createElement('script');
+					E.src = 'https://platform.twitter.com/bookmarklets/share.js?v=1';
+					F.getElementsByTagName('head')[0].appendChild(E)
+				},
+			
+				getGradeColor(grade){
+					let res = '#fda903' // OP orange
+					try {
+						switch(grade){
+							case 'G1':
+								res = '#4b82dc'
+								break
+							case 'G2':
+								res = '#f35482'
+								break
+							case 'G3':
+								res = '#37bc55'
+								break
+							default:
+								res = '#fda903'
+								break
+						}
+					} catch (e) {console.error(e)}
+					return res
+				},
+			},
+		})
+	</script>
+
+	<style>
+		[v-cloak]{display: none;}
+		.aic{ align-items: center; }
+
+		tbody tr {
+			border-top:1px solid #aaa;
+		}
+		tbody tr[data-bakusin] {
+			color:red;
+		}
+		tbody td {
+			word-break: break-all;
+		}
+		tbody td:not(:last-child) {
+			border-right: 1px dotted #ccc;
+		}
+
+		/* 後半行は背景を薄い灰色にする（前半と交互に見せる） */
+		[data-half="2"] {
+			background-color: #f0f0f0;
+		}
+
+		/* 出走選択行は太字にする */
+		[data-checked="true"] {
+			font-weight: bold;
+		}
+
+		/* レース階級 */
+		[data-grade] {
+			text-align: center;
+			color: #fff;
+		}
+		[data-grade="G1"] { background-color: #4b82dc; }
+		[data-grade="G2"] { background-color: #f35482; }
+		[data-grade="G3"] { background-color: #37bc55; }
+		[data-grade="OP"] { background-color: #fda903; }
+		[data-grade="Pre-OP"] { background-color: #fda903; }
+	</style>
+</body>
+</html>
