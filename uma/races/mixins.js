@@ -6,12 +6,6 @@ common.URL = {
 }
 
 common.URL.BASE = url.origin + '/'
-common.URL.TWDATA = common.URL.BASE + 'tw/'
-
-if (common.URL.href.includes('github.io')) {
-	common.URL.BASE += common.URL.href.includes('-test') ? 'twlog/' : 'dt/'
-	common.URL.TWDATA = common.URL.href.includes('-test') ? 'https://deductive-test.github.io/twdata/' : common.URL.BASE + 'tw/'
-}
 
 const myMixins = {
 	data() {
