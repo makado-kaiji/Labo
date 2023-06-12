@@ -492,13 +492,20 @@
 					// 計算結果を表示した際、ここで「種別、回復量、到達時刻」をコピー出力？できる値を作っておく
 					let d = new Date();
 
-					// 刀剣モードなら回復量は表示しない & nameではなくmodeで表示
+					// 刀剣モード：回復量は表示しない & nameではなくmodeで表示
 					if (this.timePattern.list[this.timePattern.selectIndex].name == '刀剣') {
 						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
 					} else {
 						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} ${this.numTargetValue}回復 by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
+						// 原神モード：探索派遣-25%を追加表示
+						if (this.timePattern.list[this.timePattern.selectIndex].name.includes('原神')) {
+							var min25 = Math.floor(this.timerSet / 60) * 0.75
+							var hour25 = Math.floor(min25 / 60)
+							min25 = min25 - hour25 * 60
+							this.copyDispTimer += ` (探索派遣-25%: ${hour25}時間${min25>0?min25+'分':''})`
+						}
 					}
 
 					// 以前はボタン押下でやってたが、面倒なので毎回実行の度に出力しちゃう
