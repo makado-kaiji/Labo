@@ -4,11 +4,8 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-	<title>crepu output</title>
+	<title>crp output</title>
 
-	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
 	<style>
 		[v-cloak] {
 			display: none !important;
@@ -18,60 +15,67 @@
 
 <body>
 	<div id="app" v-cloak>
-		<v-app>
-			<!-- メイン -->
-			<v-main>
-				<v-container>
-					<v-row>
-						<v-col>
-						</v-col>
-					</v-row>
 
-					<!-- debug swap -->
-					<div style="text-align: right;">
-						<br><br><br>
-						<v-btn x-small depressed color="white" @click="changeDebugMode">
-							<span class="white--text">{{ (isDebug ? 'ON→OFF' : 'OFF→ON') }}</span>
-						</v-btn>
-					</div>
-					<!-- debug area -->
-					<div v-show="isDebug" style="word-break: break-all;">
-						isDebug
-						<br>
-						<a :href="URL.href">{{URL.href}}</a>
-						<br>
-						<br>
-						<v-btn small @click="loading = !loading">loading->{{!loading}}</v-btn>
-					</div>
-					<!-- デバッグエリア ここまで -->
-				</v-container>
-			</v-main>
+		<p>start: </p>
+		<p><a :href="startUrl" target="_blank">{{startUrl}}</a></p>
 
-			<v-overlay :value="loading">
-				<v-progress-circular indeterminate :size="200" @click="loading = !loading" />
-			</v-overlay>
+		<br>
+		<p>paste response:</p>
+		<p><textarea v-model="input.page1" style="width: 90vw;" rows="5" @change="formatPage1"></textarea></p>
+		<div v-if="input.page1json && input.page1json.pagination && input.page1json.pagination.current_page" style="padding-left: 1em;">
+			<p>current_page: {{input.page1json.pagination.current_page}}</p>
+			<p>last_page: {{input.page1json.pagination.last_page}}</p>
+			<p>total: {{input.page1json.pagination.total}}</p>
+			<details>
+				<summary>TL</summary>
+				<!-- json table -->
+				<table v-if="input.page1json.data" class="json-table">
+					<tr>
+						<td>#</td>
+						<td v-for="(colh,colhi) in Object.keys(input.page1json.data[0])" :key="'colh-'+colhi">{{colh}}</td>
+					</tr>
+					<tr v-for="(row,rowi) in input.page1json.data" :key="'row-'+rowi">
+						<td>{{rowi}}</td>
+						<td v-for="(col,coli) in Object.keys(row)" :key="'col-'+coli" :title="`${rowi}: ${col}`">{{row[col]}}</td>
+					</tr>
+				</table>
+			</details>
+		</div>
 
-		</v-app>
+		<div v-if="pageUrls && pageUrls.length > 0">
+			<br>
+			<details>
+				<summary>pageUrls: [{{pageUrls.length}}]</summary>
+				<p v-for="(p,pi) in pageUrls" :key="'p+'+pi">
+					[{{pi}}]
+					<a :href="p" target="_blank">{{p}}</a>
+				</p>
+			</details>
+			<button @click="openUrls">openUrls</button>
+		</div>
 
-		<!-- json table
-		<table v-if="list" class="json-table">
-			<tr>
-				<td v-for="(colh,colhi) in Object.keys(list[0])" :key="'colh-'+colhi">{{colh}}</td>
-			</tr>
-			<tr v-for="(row,rowi) in list" :key="'row-'+rowi">
-				<td v-for="(col,coli) in Object.keys(row)" :key="'col-'+coli">{{row[col]}}</td>
-			</tr>
-		</table> -->
+		<!-- debug swap -->
+		<div style="text-align: right;">
+			<br><br><br>
+			<button id="debug" @click="changeDebugMode">{{isDebug ? 'ON→OFF' : 'OFF→ON'}} ({{debugCount}})</button>
+		</div>
+		<!-- debug area -->
+		<div v-show="isDebug" style="word-break: break-all;">
+			isDebug
+			<br>
+			<a :href="URL.href">{{URL.href}}</a>
+			<br>
+			<br>
+		</div>
+		<!-- debug area end -->
 
 	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/jquery@3.x"></script>
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 	<script>
 	const myvue = new Vue({
 		el: '#app',
-		vuetify: new Vuetify(),
 		components: {
 		},
 		computed: {
@@ -86,7 +90,14 @@
 			isDebug: false,
 			loading:true,
 			URL:{},
-			input:{},
+			input:{
+				page1:'',
+				page1json:{},
+			},
+
+			baseUrl: 'https://api.crepu.net/api/v1.0/dashboard?sort=0&filter_post_easy=true&filter_post_text=true&filter_post_image=true&filter_post_sample=true&filter_post_quote_repost=true&filter_all=true&filter_follower=true&filter_private=true&filter_age_limit_types[]=0&filter_age_limit_types[]=1&filter_one_cushion_flg[]=0&filter_one_cushion_flg[]=1&filter_fan_fiction[]=0&filter_fan_fiction[]=1&filter_ai_flg[]=0&filter_ai_flg[]=1&page=',
+			startUrl: '',
+			pageUrls:[],
 		}, // data
 		mounted() {
 			this.loading = false
@@ -98,6 +109,7 @@
 				BASE: url.origin + '/',
 				API : url.origin + '/TODO_API/API/',
 			}
+			this.startUrl = this.baseUrl + 1
 			console.log(`${(new Date()).toLocaleString()} ${(new Date()).getTime()} [mounted] end`)
 		}, // mounted
 		methods: {
@@ -109,14 +121,65 @@
 				this.isDebug = !this.isDebug
 				}
 			}, // changeDebugMode
+
+			/** jQuery ajax custom */
+			zjax (option, doneFunc, failFunc, alwaysFunc) {
+				var base = {
+					type: 'get',
+					async: true,
+					contentType: 'application/json',
+					cache: false,
+				};
+				var param = $.extend(base, option);
+
+				if (param.data && (typeof param.data).toLowerCase() != 'string' && param.type.toLowerCase() !== 'get') {
+					param.data = JSON.stringify(param.data);
+				}
+
+				console.log(`${(new Date()).toLocaleString()} ${(new Date()).getTime()} [zjax] start\n${param.url}`)
+				let sec = (new Date()).getTime()
+				$.ajax(param)
+					.done(d => {
+						console.log(`${(new Date()).toLocaleString()} ${(new Date()).getTime()} [zjax] done\n${param.url}\nsec = ${(new Date().getTime()) - sec}`)
+						console.log(d)
+						if (this.isFunction(doneFunc)) doneFunc(d);
+					}).fail(d => {
+						console.error(`${(new Date()).toLocaleString()} ${(new Date()).getTime()} [zjax] fail\n${param.url}\nsec = ${(new Date().getTime()) - sec}`)
+						console.error(d)
+						if (this.isFunction(failFunc)) failFunc(d);
+					}).always(d => {
+						if (this.isFunction(alwaysFunc)) alwaysFunc(d);
+					});
+			},
+			isFunction (f) {
+				return (typeof f).toLowerCase() == 'function';
+			},
+
+			formatPage1(){
+				try {
+					this.input.page1json = JSON.parse(this.input.page1)
+					this.createUrl()
+				} catch (e) { console.error(e) }
+			},
+
+			createUrl(){
+				this.pageUrls = []
+				for (let i = this.input.page1json.pagination.current_page; i <= this.input.page1json.pagination.last_page; i++) {
+					this.pageUrls.push(this.baseUrl + i)
+				}
+			},
+
+			openUrls(){
+				for (let i = 0; i < this.pageUrls.length; i++) {
+					window.open(this.pageUrls[i])
+				}
+			},
+
 		}, // methods
 	})
 	</script>
 
 	<style>
-		.v-btn {
-		text-transform: none;
-		}
 		.aic {align-items: center;}
 		.asc {align-self: center;}
 	
@@ -130,6 +193,23 @@
 	
 		table.json-table td:not(:first-of-type) {
 			border-left: 1px solid #ccc;
+		}
+
+		button#debug {
+			color: #fff;
+			background: #fff;
+			border: none;
+		}
+		button#debug:hover {
+			background: #ccc;
+		}
+		button#debug:active {
+			background: #ccc;
+		}
+
+		p,a {
+			margin:0;
+			word-break: break-all;
 		}
 	</style>
 
