@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+	<title>crepu output</title>
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+	<style>
+		[v-cloak] {
+			display: none !important;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<v-app>
+			<!-- メイン -->
+			<v-main>
+				<v-container>
+					<v-row>
+						<v-col>
+						</v-col>
+					</v-row>
+
+					<!-- debug swap -->
+					<div style="text-align: right;">
+						<br><br><br>
+						<v-btn x-small depressed color="white" @click="changeDebugMode">
+							<span class="white--text">{{ (isDebug ? 'ON→OFF' : 'OFF→ON') }}</span>
+						</v-btn>
+					</div>
+					<!-- debug area -->
+					<div v-show="isDebug" style="word-break: break-all;">
+						isDebug
+						<br>
+						<a :href="URL.href">{{URL.href}}</a>
+						<br>
+						<br>
+						<v-btn small @click="loading = !loading">loading->{{!loading}}</v-btn>
+					</div>
+					<!-- デバッグエリア ここまで -->
+				</v-container>
+			</v-main>
+
+			<v-overlay :value="loading">
+				<v-progress-circular indeterminate :size="200" @click="loading = !loading" />
+			</v-overlay>
+
+		</v-app>
+
+		<!-- json table
+		<table v-if="list" class="json-table">
+			<tr>
+				<td v-for="(colh,colhi) in Object.keys(list[0])" :key="'colh-'+colhi">{{colh}}</td>
+			</tr>
+			<tr v-for="(row,rowi) in list" :key="'row-'+rowi">
+				<td v-for="(col,coli) in Object.keys(row)" :key="'col-'+coli">{{row[col]}}</td>
+			</tr>
+		</table> -->
+
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.x"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+	<script>
+	const myvue = new Vue({
+		el: '#app',
+		vuetify: new Vuetify(),
+		components: {
+		},
+		computed: {
+			TODO2 () {
+				let res = ''
+				try {} catch (e) { console.error(e) }
+				return res
+			}, // TODO2
+		},
+		data: {
+			debugCount:0,
+			isDebug: false,
+			loading:true,
+			URL:{},
+			input:{},
+		}, // data
+		mounted() {
+			this.loading = false
+			const url = new URL(location.href)
+			this.URL = {
+				href: location.href,
+				origin: url.origin,
+				query: Object.fromEntries(url.searchParams),
+				BASE: url.origin + '/',
+				API : url.origin + '/TODO_API/API/',
+			}
+			console.log(`${(new Date()).toLocaleString()} ${(new Date()).getTime()} [mounted] end`)
+		}, // mounted
+		methods: {
+			/** changeDebugMode */
+			changeDebugMode () {
+				this.debugCount++
+				console.log(`debugCount = ${this.debugCount}`)
+				if (this.debugCount % 10 === 0) {
+				this.isDebug = !this.isDebug
+				}
+			}, // changeDebugMode
+		}, // methods
+	})
+	</script>
+
+	<style>
+		.v-btn {
+		text-transform: none;
+		}
+		.aic {align-items: center;}
+		.asc {align-self: center;}
+	
+		table.json-table {
+			border-spacing: 0;
+		}
+	
+		table.json-table tr:not(:last-of-type) td {
+			border-bottom: 1px solid #ccc;
+		}
+	
+		table.json-table td:not(:first-of-type) {
+			border-left: 1px solid #ccc;
+		}
+	</style>
+
+</body>
+</html>
