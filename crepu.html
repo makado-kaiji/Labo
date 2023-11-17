@@ -106,7 +106,8 @@
 				page1json:{},
 			},
 
-			baseUrl: 'https://api.crepu.net/api/v1.0/dashboard?sort=0&filter_post_easy=true&filter_post_text=true&filter_post_image=true&filter_post_sample=true&filter_post_quote_repost=true&filter_all=true&filter_follower=true&filter_private=true&filter_age_limit_types[]=0&filter_age_limit_types[]=1&filter_one_cushion_flg[]=0&filter_one_cushion_flg[]=1&filter_fan_fiction[]=0&filter_fan_fiction[]=1&filter_ai_flg[]=0&filter_ai_flg[]=1&page=',
+			// 古い順から1ページ換算->書込が増えるごとにページを増やす
+			baseUrl: 'https://api.crepu.net/api/v1.0/dashboard?sort=1&filter_post_easy=true&filter_post_text=true&filter_post_image=true&filter_post_sample=true&filter_post_quote_repost=true&filter_all=true&filter_follower=true&filter_private=true&filter_age_limit_types[]=0&filter_age_limit_types[]=1&filter_one_cushion_flg[]=0&filter_one_cushion_flg[]=1&filter_fan_fiction[]=0&filter_fan_fiction[]=1&filter_ai_flg[]=0&filter_ai_flg[]=1&page=',
 			startUrl: '',
 			pageUrls:[],
 
