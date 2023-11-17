@@ -51,6 +51,7 @@
 					<a :href="p" target="_blank">{{p}}</a>
 				</p>
 			</details>
+			<button @click="openUrlsList">openUrls</button>
 		</div>
 
 		<div v-if="detailUrls && detailUrls.length > 0">
@@ -62,7 +63,7 @@
 					<a :href="d" target="_blank">{{d}}</a>
 				</p>
 			</details>
-			<button @click="openUrls">openUrls</button>
+			<button @click="openUrlsDetail">openUrls</button>
 		</div>
 
 		<div>lastModified: {{lastModified}}</div>
@@ -114,7 +115,7 @@
 			startUrl: '',
 			pageUrls:[],
 
-			baseUrlDetail: 'https://api.crepu.net/api/v1.0/post/4258507?post_id=',
+			baseUrlDetail: 'https://api.crepu.net/api/v1.0/post/',
 			detailUrls:[],
 
 		}, // data
@@ -194,7 +195,13 @@
 				}
 			},
 
-			openUrls(){
+			openUrlsList(){
+				for (let i = 0; i < this.pageUrls.length; i++) {
+					window.open(this.pageUrls[i])
+				}
+			},
+
+			openUrlsDetail(){
 				for (let i = 0; i < this.detailUrls.length; i++) {
 					window.open(this.detailUrls[i])
 				}
