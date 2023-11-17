@@ -51,6 +51,17 @@
 					<a :href="p" target="_blank">{{p}}</a>
 				</p>
 			</details>
+		</div>
+
+		<div v-if="detailUrls && detailUrls.length > 0">
+			<br>
+			<details>
+				<summary>detailUrls: [{{detailUrls.length}}]</summary>
+				<p v-for="(d,di) in detailUrls" :key="'d+'+di">
+					[{{di}}]
+					<a :href="d" target="_blank">{{d}}</a>
+				</p>
+			</details>
 			<button @click="openUrls">openUrls</button>
 		</div>
 
@@ -98,6 +109,10 @@
 			baseUrl: 'https://api.crepu.net/api/v1.0/dashboard?sort=0&filter_post_easy=true&filter_post_text=true&filter_post_image=true&filter_post_sample=true&filter_post_quote_repost=true&filter_all=true&filter_follower=true&filter_private=true&filter_age_limit_types[]=0&filter_age_limit_types[]=1&filter_one_cushion_flg[]=0&filter_one_cushion_flg[]=1&filter_fan_fiction[]=0&filter_fan_fiction[]=1&filter_ai_flg[]=0&filter_ai_flg[]=1&page=',
 			startUrl: '',
 			pageUrls:[],
+
+			baseUrlDetail: 'https://api.crepu.net/api/v1.0/post/4258507?post_id=',
+			detailUrls:[],
+
 		}, // data
 		mounted() {
 			this.loading = false
@@ -167,11 +182,16 @@
 				for (let i = this.input.page1json.pagination.current_page; i <= this.input.page1json.pagination.last_page; i++) {
 					this.pageUrls.push(this.baseUrl + i)
 				}
+
+				this.detailUrls = []
+				for (let i = 0; i < this.input.page1json.data.length; i++) {
+					this.detailUrls.push(this.baseUrlDetail + this.input.page1json.data[i].post_id)
+				}
 			},
 
 			openUrls(){
-				for (let i = 0; i < this.pageUrls.length; i++) {
-					window.open(this.pageUrls[i])
+				for (let i = 0; i < this.detailUrls.length; i++) {
+					window.open(this.detailUrls[i])
 				}
 			},
 
