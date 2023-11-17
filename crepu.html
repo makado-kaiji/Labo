@@ -66,7 +66,10 @@
 			<button @click="openUrlsDetail">openUrls</button>
 		</div>
 
-		<div>lastModified: {{lastModified}}</div>
+		<div>
+			<br>
+			lastModified: {{lastModified}}
+		</div>
 
 		<!-- debug swap -->
 		<div style="text-align: right;">
@@ -197,13 +200,13 @@
 
 			openUrlsList(){
 				for (let i = 0; i < this.pageUrls.length; i++) {
-					window.open(this.pageUrls[i])
+					window.open(this.pageUrls[i], i+1)
 				}
 			},
 
 			openUrlsDetail(){
 				for (let i = 0; i < this.detailUrls.length; i++) {
-					window.open(this.detailUrls[i])
+					window.open(this.detailUrls[i], this.page1json.data[i].post_id)
 				}
 			},
 
