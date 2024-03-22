@@ -431,6 +431,7 @@
 					var ret = Math.floor((hour * 60 + min) / this.numBaseTime);
 					var setDate = new Date();
 					setDate.setMinutes(setDate.getMinutes() + hour * 60 + min);
+					console.log(`${(new Date()).toLocaleString()} ${(new Date()).getTime()} [calcFromSyoyoJikan] + ${hour}h ${min}min -> ${this.FormatDate(setDate,'/',true,true)}`)
 					this.dispResult(ret, null, null, setDate.getHours(), setDate.getMinutes());
 
 					// タイマー準備
@@ -619,6 +620,11 @@
 					F.getElementsByTagName('head')[0].appendChild(E)
 				},
 				
+				/** 【日付変換】 */
+				FormatDate (d = new Date(), f = '/', time = false, day = false) {
+					return `${d.getFullYear()}${f}${(d.getMonth() + 1).toString().padStart(2, '0')}${f}${d.getDate().toString().padStart(2, '0')}${day ? `(${'日月火水木金土'[d.getDay()]})` : ''}${time ? ` ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}` : ''}`
+				},
+
 			},
 		});
 	</script>
