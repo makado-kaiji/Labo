@@ -70,23 +70,23 @@
 		<!-- 回復基準 -->
 		<div>
 			<span>回復基準：</span>
-			<input type="number" v-model="numBaseTime" max="999" min="0">
+			<input type="number" v-model="numBaseTime" inputmode="tel" max="999" min="0">
 			<span>分／1回復</span>
 		</div>
 
 		<!-- 回復量 -->
 		<div>
 			<span>回復量　：</span>
-			<input type="number" v-model="numTargetValue" max="999" min="0" v-on:keypress="numTargetValueOnKeypress" v-on:blur="hankaku2Zenkaku('numTargetValue',$event)">
+			<input type="number" v-model="numTargetValue" inputmode="tel" max="999" min="0" v-on:keypress="numTargetValueOnKeypress" v-on:blur="hankaku2Zenkaku('numTargetValue',$event)">
 			<input type="button" id="btnTargetValue" value="変換" v-on:click="calcFromKaihukuryo">
 		</div>
 
 		<!-- 所要時間 -->
 		<div>
 			<span>所要時間：</span>
-			<input type="number" v-model="numRequiredTimeHour" max="999" min="0" v-on:keypress="numRequiredTimeOnKeypress">
+			<input type="number" v-model="numRequiredTimeHour" inputmode="tel" max="999" min="0" v-on:keypress="numRequiredTimeOnKeypress">
 			<span>時間</span>
-			<input type="number" v-model="numRequiredTimeMin" max="59" min="0" v-on:keypress="numRequiredTimeOnKeypress">
+			<input type="number" v-model="numRequiredTimeMin" inputmode="tel" max="59" min="0" v-on:keypress="numRequiredTimeOnKeypress">
 			<span>分</span>
 			<input type="button" id="btnRequiredTime" value="変換" v-on:click="calcFromSyoyoJikan">
 		</div>
@@ -94,9 +94,9 @@
 		<!-- 到達時刻 -->
 		<div>
 			<span>到達時刻：</span>
-			<input type="number" v-model="numTargetTimeHour" max="999" min="0" v-on:keypress="numTargetTimeOnKeypress">
+			<input type="number" v-model="numTargetTimeHour" inputmode="tel" max="999" min="0" v-on:keypress="numTargetTimeOnKeypress">
 			<span>時</span>
-			<input type="number" v-model="numTargetTimeMin" max="59" min="0" v-on:keypress="numTargetTimeOnKeypress">
+			<input type="number" v-model="numTargetTimeMin" inputmode="tel" max="59" min="0" v-on:keypress="numTargetTimeOnKeypress">
 			<span>分</span>
 			<input type="button" id="btnTargetTime" value="変換" v-on:click="calcFromToutatuJikoku">
 		</div>
