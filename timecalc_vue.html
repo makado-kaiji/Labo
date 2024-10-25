@@ -104,9 +104,9 @@
 		<!-- ほよば式「あとX日Y時間」 -->
 		<div>
 			<span>残り時間：</span>
-			<input v-model.number="hoyoTime.day" type="number" max="99" min="0">日
-			<input v-model.number="hoyoTime.hour" type="number" max="23" min="0">時間
-			<input v-model.number="hoyoTime.min" type="number" max="59" min="0">分
+			<input v-model.number="hoyoTime.day" type="number" inputmode="tel" max="99" min="0">日
+			<input v-model.number="hoyoTime.hour" type="number" inputmode="tel" max="23" min="0">時間
+			<input v-model.number="hoyoTime.min" type="number" inputmode="tel" max="59" min="0">分
 			<button @click="calcHoyoTime">変換</button>
 			<div v-if="hoyoTime.result">　　　　　→ {{hoyoTime.result}}</div>
 		</div>
@@ -382,7 +382,7 @@
 			methods: {
 				/** 現在時刻表示 */
 				dispNowDateTime () {
-					this.nowDateTime = this.FormatDate(new Date(Date.now()()), '/', true, true);
+					this.nowDateTime = this.FormatDate(new Date(Date.now()), '/', true, true);
 				},
 
 				/** 日付変換
