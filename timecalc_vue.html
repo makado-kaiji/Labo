@@ -101,6 +101,16 @@
 			<input type="button" id="btnTargetTime" value="変換" v-on:click="calcFromToutatuJikoku">
 		</div>
 
+		<!-- ほよば式「あとX日Y時間」 -->
+		<div>
+			<span>残り時間：</span>
+			<input v-model.number="hoyoTime.day" type="number" max="99" min="0">日
+			<input v-model.number="hoyoTime.hour" type="number" max="23" min="0">時間
+			<input v-model.number="hoyoTime.min" type="number" max="59" min="0">分
+			<button @click="calcHoyoTime">変換</button>
+			<div v-if="hoyoTime.result">　　　　　→ {{hoyoTime.result}}</div>
+		</div>
+
 		<p style="font-size: x-small;">※Enterキーでも実行できます</p>
 
 		<!-- 結果表示・タイマーボタン -->
@@ -353,6 +363,13 @@
 				calc: '0', // 電卓用文字列
 
 				lastModified: (new Date(document.lastModified)).toLocaleString(), // 最終更新日時
+
+				hoyoTime:{
+					day:0,
+					hour:0,
+					min:0,
+					result:'',
+				},
 			},
 			mounted() {
 				// 現在時刻を表示し続ける
@@ -365,7 +382,7 @@
 			methods: {
 				/** 現在時刻表示 */
 				dispNowDateTime () {
-					this.nowDateTime = this.FormatDate(new Date(), '/', true, true);
+					this.nowDateTime = this.FormatDate(new Date(Date.now()()), '/', true, true);
 				},
 
 				/** 日付変換
@@ -380,7 +397,7 @@
 				* @param {Boolean} [day = true] 曜日を表示するかどうか
 				* @returns {String} [YYYY/MM/DD(d) HH:mm:ss] 形式文字列
 				*/
-				FormatDate(d = new Date(), f = '/', time = true, day = true) {
+				FormatDate(d = new Date(Date.now()), f = '/', time = true, day = true) {
 					return `${d.getFullYear()}${f}${(d.getMonth() + 1).toString().padStart(2, '0')}${f}${d.getDate().toString().padStart(2, '0')}${day ? `(${this.dayList[d.getDay()]})` : ''}${time ? ` ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}` : ''}`
 				},
 			
@@ -414,7 +431,7 @@
 					var ret = Number(this.numTargetValue) * this.numBaseTime;
 					var hour = Math.floor(ret / 60);
 					var min = ret % 60;
-					var setDate = new Date();
+					var setDate = new Date(Date.now());
 					setDate.setMinutes(setDate.getMinutes() + ret);
 					this.dispResult(null, hour, min, setDate.getHours(), setDate.getMinutes());
 
@@ -439,9 +456,9 @@
 					var hour = Number(this.numRequiredTimeHour);
 					var min = Number(this.numRequiredTimeMin);
 					var ret = Math.floor((hour * 60 + min) / this.numBaseTime);
-					var setDate = new Date();
+					var setDate = new Date(Date.now());
 					setDate.setMinutes(setDate.getMinutes() + hour * 60 + min);
-					console.log(`${(new Date()).toLocaleString()} ${(new Date()).getTime()} [calcFromSyoyoJikan] + ${hour}h ${min}min -> ${this.FormatDate(setDate,'/',true,true)}`)
+					console.log(`${(new Date(Date.now())).toLocaleString()} ${(new Date(Date.now())).getTime()} [calcFromSyoyoJikan] + ${hour}h ${min}min -> ${this.FormatDate(setDate,'/',true,true)}`)
 					this.dispResult(ret, null, null, setDate.getHours(), setDate.getMinutes());
 
 					// タイマー準備
@@ -464,7 +481,7 @@
 					// 計算→表示
 					var addHour = Number(this.numTargetTimeHour);
 					var addMin = Number(this.numTargetTimeMin);
-					var nowDate = new Date();
+					var nowDate = new Date(Date.now());
 					var tgtDate;
 					if (nowDate.getHours() * 60 + nowDate.getMinutes() < addHour * 60 + addMin) {
 						// 日付変更なし
@@ -523,7 +540,7 @@
 					this.timerResult = "あと " + hour + "時間" + min + "分" + sec + "秒";
 
 					// 計算結果を表示した際、ここで「種別、回復量、到達時刻」をコピー出力？できる値を作っておく
-					let d = new Date();
+					let d = new Date(Date.now());
 
 					// 刀剣モード：回復量は表示しない & nameではなくmodeで表示
 					if (this.timePattern.list[this.timePattern.selectIndex].name == '刀剣') {
@@ -631,9 +648,20 @@
 				},
 				
 				/** 【日付変換】 */
-				FormatDate (d = new Date(), f = '/', time = false, day = false) {
+				FormatDate (d = new Date(Date.now()), f = '/', time = false, day = false) {
 					return `${d.getFullYear()}${f}${(d.getMonth() + 1).toString().padStart(2, '0')}${f}${d.getDate().toString().padStart(2, '0')}${day ? `(${'日月火水木金土'[d.getDay()]})` : ''}${time ? ` ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}` : ''}`
 				},
+
+				//ほよば式表記の計算
+				calcHoyoTime(){
+					console.log(`${new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday: 'short',hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3})
+						} [calcHoyoTime] ${this.hoyoTime.day}, ${this.hoyoTime.hour}, ${this.hoyoTime.min}`);
+					const now = new Date(Date.now())
+					let res = new Date(now.getTime())
+					let addMin = (this.hoyoTime.day * 24 * 60) + (this.hoyoTime.hour * 60) + this.hoyoTime.min
+					res.setMinutes(res.getMinutes() + addMin)
+					this.hoyoTime.result = res.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday: 'short',hour:'2-digit',minute:'2-digit'})
+				},//calcHoyoTime
 
 			},
 		});
