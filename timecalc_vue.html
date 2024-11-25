@@ -170,6 +170,27 @@
 			</table>
 		</div>
 
+		<!-- 天賦本・武器素材計算 color:#D4B54D; -->
+		<div>
+			<p style="margin-bottom: 0;">天賦本・武器素材計算</p>
+			<div>
+				<span style="color:#E3AD57;">5: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star5" min="0" max="999" style="width:2rem;">
+				<span style="color:#B085C8;">4: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star4" min="0" max="999" style="width:2rem;">
+				<span style="color:#40A1B0;">3: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star3" min="0" max="999" style="width:2rem;">
+				<span style="color:#5E9364;">2: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star2" min="0" max="999" style="width:2rem;">
+				<span style="color:#888F9A;">1: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star1" min="0" max="999" style="width:2rem;">
+				<br><button @click="clearHoyoItem">clear</button>
+			</div>
+			<div>
+				only:
+				<span style="color:#E3AD57;">5:{{hoyoItemStar5}}</span>
+				&nbsp;<span style="color:#B085C8;">4:{{hoyoItemStar4}}</span>
+				&nbsp;<span style="color:#40A1B0;">3:{{hoyoItemStar3}}</span>
+				&nbsp;<span style="color:#5E9364;">2:{{hoyoItemStar2}}</span>
+				&nbsp;<span style="color:#888F9A;">1:{{hoyoItemStar1}}</span>
+			</div>
+		</div>
+
 		<!-- 最終更新日時 -->
 		<p style="font-size: small;">Last Update: {{ lastModified }}</p>
 		<br>
@@ -178,6 +199,71 @@
 	<script>
 		const vue = new Vue({
 			el: '#vue',
+			computed:{
+				//一旦★1まで全て戻した合計が全ての基準となる
+				hoyoItemStar1(){
+					let res = 0
+					try {
+						res = (this.hoyoItem.star1)
+								+ (this.hoyoItem.star2*this.hoyoItem.keisu)
+								+ (this.hoyoItem.star3*this.hoyoItem.keisu*this.hoyoItem.keisu)
+								+ (this.hoyoItem.star4*this.hoyoItem.keisu*this.hoyoItem.keisu*this.hoyoItem.keisu)
+								+ (this.hoyoItem.star5*this.hoyoItem.keisu*this.hoyoItem.keisu*this.hoyoItem.keisu*this.hoyoItem.keisu)
+					} catch (e) {
+						console.error(e)
+						res=0
+					}
+					return res
+				},//
+				hoyoItemStar5(){
+					let res = 0
+					try {
+						res = this.hoyoItemStar1 > 0
+							? this.hoyoItemStar1/this.hoyoItem.keisu/this.hoyoItem.keisu/this.hoyoItem.keisu/this.hoyoItem.keisu|0
+							: 0
+					} catch (e) {
+						console.error(e)
+						res = 0
+					}
+					return res
+				},//hoyoItemStar5
+				hoyoItemStar4(){
+					let res = 0
+					try {
+						res = this.hoyoItemStar1 > 0
+							? this.hoyoItemStar1/this.hoyoItem.keisu/this.hoyoItem.keisu/this.hoyoItem.keisu|0
+							: 0
+					} catch (e) {
+						console.error(e)
+						res = 0
+					}
+					return res
+				},//hoyoItemStar4
+				hoyoItemStar3(){
+					let res = 0
+					try {
+						res = this.hoyoItemStar1 > 0
+							? this.hoyoItemStar1/this.hoyoItem.keisu/this.hoyoItem.keisu|0
+							: 0
+					} catch (e) {
+						console.error(e)
+						res = 0
+					}
+					return res
+				},//hoyoItemStar3
+				hoyoItemStar2(){
+					let res = 0
+					try {
+						res = this.hoyoItemStar1 > 0
+							? this.hoyoItemStar1/this.hoyoItem.keisu|0
+							: 0
+					} catch (e) {
+						console.error(e)
+						res = 0
+					}
+					return res
+				},//hoyoItemStar2
+			},//computed
 			data: {
 				nowDateTime:null, // 現在時刻
 				dayList: ['日','月','火','水','木','金','土'], // 曜日定義
@@ -369,6 +455,16 @@
 					hour:null,
 					min:null,
 					result:'',
+				},
+
+				hoyoItem:{
+					mode:0, //0:天賦本、1:武器素材
+					keisu:3,
+					star5:0,
+					star4:0,
+					star3:0,
+					star2:0,
+					star1:0,
 				},
 			},
 			mounted() {
@@ -662,6 +758,14 @@
 					res.setMinutes(res.getMinutes() + addMin)
 					this.hoyoTime.result = res.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday: 'short',hour:'2-digit',minute:'2-digit'})
 				},//calcHoyoTime
+
+				clearHoyoItem(){
+					this.hoyoItem.star1=0
+					this.hoyoItem.star2=0
+					this.hoyoItem.star3=0
+					this.hoyoItem.star4=0
+					this.hoyoItem.star5=0
+				},//clearHoyoItem
 
 			},
 		});
