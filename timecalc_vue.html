@@ -111,6 +111,12 @@
 			<div v-if="hoyoTime.result">　　　　　→ {{hoyoTime.result}}</div>
 		</div>
 
+		<!-- 今からMAX -->
+		<div>
+			今：<input v-model.number="nowMax" type="number" inputmode="tel" max="999" min="0"> / {{patternMax}}
+			<button @click="numTargetValue = patternMax - nowMax; calcFromKaihukuryo()">変換</button>
+		</div>
+
 		<p style="font-size: x-small;">※Enterキーでも実行できます</p>
 
 		<!-- 結果表示・タイマーボタン -->
@@ -174,12 +180,19 @@
 		<div>
 			<p style="margin-bottom: 0;">天賦本・武器素材計算</p>
 			<div>
+				現在値：
 				<span style="color:#E3AD57;">5: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star5" min="0" max="999" style="width:2rem;">
 				<span style="color:#B085C8;">4: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star4" min="0" max="999" style="width:2rem;">
 				<span style="color:#40A1B0;">3: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star3" min="0" max="999" style="width:2rem;">
 				<span style="color:#5E9364;">2: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star2" min="0" max="999" style="width:2rem;">
 				<span style="color:#888F9A;">1: </span><input type="number" inputmode="tel"v-model.number="hoyoItem.star1" min="0" max="999" style="width:2rem;">
 				<br><button @click="clearHoyoItem">clear</button>
+			</div>
+			<div>
+				目標値：
+				<label><input type="checkbox" name="" id="">スキル</label>
+				<label><input type="checkbox" name="" id="">通常</label>
+				<label><input type="checkbox" name="" id="">爆発</label>
 			</div>
 			<div>
 				only:
@@ -263,6 +276,22 @@
 					}
 					return res
 				},//hoyoItemStar2
+
+				//今選んでいる回復種別のMAX値
+				patternMax(){
+					let res = -1
+					try {
+						if (this.timePattern.selectIndex < 0 || this.timePattern.list.length <= this.timePattern.selectIndex) return
+
+						const max = this.timePattern.list[this.timePattern.selectIndex].mode.findIndex(x => {
+							x.name == 'MAX'
+						})
+						if (-1 < max){
+							res = this.timePattern.list[this.timePattern.selectIndex].mode[max].value
+						}
+					} catch (e) { console.error(e) }
+					return res
+				},
 			},//computed
 			data: {
 				nowDateTime:null, // 現在時刻
@@ -465,7 +494,19 @@
 					star3:0,
 					star2:0,
 					star1:0,
+
+					//目標値
+					wantTujo:false,
+					wantSkill:false,
+					wantBakuhatu:false,
+					wantstar5:0,
+					wantstar4:0,
+					wantstar3:0,
+					wantstar2:0,
+					wantstar1:0,
 				},
+
+				nowMax:0, // 今からMAX
 			},
 			mounted() {
 				// 現在時刻を表示し続ける
