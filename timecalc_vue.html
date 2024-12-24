@@ -283,12 +283,20 @@
 					try {
 						if (this.timePattern.selectIndex < 0 || this.timePattern.list.length <= this.timePattern.selectIndex) return
 
-						const max = this.timePattern.list[this.timePattern.selectIndex].mode.findIndex(x => {
-							x.name == 'MAX'
-						})
-						if (-1 < max){
-							res = this.timePattern.list[this.timePattern.selectIndex].mode[max].value
+						//なぜかfindeIndexで取れない(-1)のでforにする
+						// const max = this.timePattern.list[this.timePattern.selectIndex].mode.findIndex(x => {
+						// 	x.name == 'MAX'
+						// })
+						// if (-1 < max){
+						// 	res = this.timePattern.list[this.timePattern.selectIndex].mode[max].value
+						// }
+
+						for (let i = 0; i < this.timePattern.list[this.timePattern.selectIndex].mode.length; i++) {
+							if (this.timePattern.list[this.timePattern.selectIndex].mode[i].name == 'MAX'){
+								res = this.timePattern.list[this.timePattern.selectIndex].mode[i].value
+							}
 						}
+
 					} catch (e) { console.error(e) }
 					return res
 				},
