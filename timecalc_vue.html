@@ -204,6 +204,14 @@
 			</div>
 		</div>
 
+		<!-- 原石変換 -->
+		<div>
+			<p style="margin-bottom: 0;">原石変換</p>
+			所持：<input type="number" inputmode="tel" v-model.number="hoyoItem.gensekiHas"   min="0" style="width:4rem;">
+			係数：<input type="number" inputmode="tel" v-model.number="hoyoItem.gensekiKeisu" min="0" style="width:4rem;">
+			<br>{{Math.round(hoyoItem.gensekiHas/hoyoItem.gensekiKeisu)}} 連
+		</div>
+
 		<!-- 最終更新日時 -->
 		<p style="font-size: small;">Last Update: {{ lastModified }}</p>
 		<br>
@@ -512,6 +520,9 @@
 					wantstar3:0,
 					wantstar2:0,
 					wantstar1:0,
+
+					gensekiHas:null,
+					gensekiKeisu:160,
 				},
 
 				nowMax:0, // 今からMAX
