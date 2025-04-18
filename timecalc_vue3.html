@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+	<title>汎用時刻計算 vue3</title>
+
+	<!-- <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet"> -->
+	<link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/vuetify@3.x/dist/vuetify.min.css" rel="stylesheet">
+	<style>
+		[v-cloak] {
+			display: none !important;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<v-app>
+			<!-- メイン -->
+			<v-main>
+				<v-container max-width="800">
+
+					<v-row dense>
+						<v-col class="pb-3">{{'2025/04/18(金) 15:07:00'}}</v-col>
+					</v-row>
+
+					<!-- 回復種別 -->
+					<v-row dense>
+						<v-col :cols="isXs?12:6">
+							<v-select density="compact" variant="outlined" hide-details>
+								<template v-slot:prepend>回復種別</template>
+							</v-select>
+						</v-col>
+						<v-col :cols="isXs?12:6">
+							<v-select density="compact" variant="outlined" hide-details>
+								<template v-if="isXs" v-slot:prepend>　　　　</template>
+							</v-select>
+						</v-col>
+					</v-row>
+					
+					<v-row dense>
+						<v-col>
+							<v-text-field type="tel" density="compact" variant="outlined" hide-details>
+								<template v-slot:prepend>回復量　</template>
+								<template v-slot:append>
+									<v-btn size="small">変換</v-btn>
+								</template>
+							</v-text-field>
+						</v-col>
+						<v-col v-if="!isXs"></v-col>
+					</v-row>
+
+					<v-row dense>
+						<v-col>
+							<v-text-field inputmode="tel" label="時間" density="compact" variant="outlined" hide-details max="99">
+								<template v-slot:prepend>所要時間</template>
+							</v-text-field>
+						</v-col>
+						<v-col>
+							<v-text-field inputmode="tel" label="分" density="compact" variant="outlined" hide-details max="99">
+								<template v-slot:append>
+									<v-btn size="small">変換</v-btn>
+								</template>
+							</v-text-field>
+						</v-col>
+						<v-col v-if="!isXs"></v-col>
+					</v-row>
+
+					<v-row dense>
+						<v-col>
+							<v-text-field inputmode="tel" label="時間" density="compact" variant="outlined" hide-details max="99">
+								<template v-slot:prepend>到達時間</template>
+							</v-text-field>
+						</v-col>
+						<v-col>
+							<v-text-field inputmode="tel" label="分" density="compact" variant="outlined" hide-details max="99">
+								<template v-slot:append>
+									<v-btn size="small">変換</v-btn>
+								</template>
+							</v-text-field>
+						</v-col>
+						<v-col v-if="!isXs"></v-col>
+					</v-row>
+					
+					<v-row dense class="aic">
+						<v-col cols="auto" class="pr-3">残り時間</v-col>
+						<v-col cols="auto">
+							<v-text-field inputmode="tel" width="3.7rem" label="日" density="compact" variant="outlined" hide-details max="99">
+							</v-text-field>
+						</v-col>
+						<v-col cols="auto">
+							<v-text-field inputmode="tel" width="3.7rem" label="時" density="compact" variant="outlined" hide-details max="99">
+							</v-text-field>
+						</v-col>
+						<v-col cols="auto">
+							<v-text-field inputmode="tel" width="3.7rem" label="分" density="compact" variant="outlined" hide-details max="99">
+							</v-text-field>
+						</v-col>
+						<v-col cols="auto" class="pl-3">
+							<v-btn size="small">変換</v-btn>
+						</v-col>
+						<v-col v-if="!isXs"></v-col>
+					</v-row>
+					
+					<v-row dense class="aic">
+						<v-col cols="auto">今からMAX</v-col>
+						<v-col cols="auto">
+							<v-text-field inputmode="tel" width="4rem" density="compact" variant="outlined" hide-details max="99">
+							</v-text-field>
+						</v-col>
+						<v-col cols="auto">
+							/ {{200}}
+						</v-col>
+						<v-col cols="auto" class="pl-3">
+							<v-btn size="small">変換</v-btn>
+						</v-col>
+						<v-col v-if="!isXs"></v-col>
+					</v-row>
+
+					<div style="text-align: right;">
+						<br><br><br>
+						<button class="text-white" @click="changeDebugMode">{{debugCount}}</button>
+					</div>
+					<div v-show="isDebug" style="word-break: break-all;">
+						<div>isDebug</div>
+						<div>lastModified: {{lm}}</div>
+						<div><a :href="URL.href">{{URL.href}}</a></div>
+						<br>
+						<div>
+							$vuetify.display.name: {{$vuetify.display.name}}
+							<br>$vuetify.display.width: {{$vuetify.display.width}}
+							<br><br>
+						</div>
+					</div>
+
+				</v-container>
+			</v-main>
+
+			<v-overlay v-model="loading" class="align-center justify-center">
+				<v-progress-circular indeterminate :size="200" @click="loading = !loading" color="white" />
+			</v-overlay>
+
+		</v-app>
+
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.x"></script>
+	<!-- .min cant debug -->
+	<!-- <script src="https://unpkg.com/vue@3.x/dist/vue.global.js"></script> -->
+	<script src="https://cdn.jsdelivr.net/npm/vue@3.x/dist/vue.global.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify@3.x/dist/vuetify.min.js"></script>
+	<script>
+		//myvue._instance.data.isDebug=true
+		const myvue = Vue.createApp({
+			setup() {
+			},//setup
+			computed: {
+				TODO2 () {
+					let res = ''
+					try {} catch (e) { console.error(e) }
+					return res
+				}, // TODO2
+				isXs(){
+					return this.$vuetify.display.name=='xs'
+				},
+			},
+			components: {
+			},
+			data() {
+				return {
+					debugCount:0,
+					isDebug: false,
+					loading:true,
+					cl: {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3},
+					lm:'',
+					URL:{},
+					input:{},
+				}
+			}, // data
+			mounted() {
+				this.lm = document.lastModified
+				const url = new URL(location.href)
+				this.URL = {
+					href: location.href,
+					origin: url.origin,
+					query: Object.fromEntries(url.searchParams),
+					BASE: url.origin + '/',
+				}
+				this.loading = false
+				console.log(`${new Date().toLocaleString('ja-JP',this.cl)} [mounted] end`)
+			}, // mounted
+			methods: {
+				// --------------------------------------------------
+				// common
+				// --------------------------------------------------
+				changeDebugMode () {
+					this.debugCount++
+					console.log(`${new Date().toLocaleString('ja-JP',this.cl)} [changeDebugMode] debugCount = ${this.debugCount}`)
+					if (this.debugCount % 10 === 0) {
+					this.isDebug = !this.isDebug
+					}
+				}, // changeDebugMode
+				isFunction (f) {
+					return (typeof f).toLowerCase() == 'function'
+				}, // isFunction
+			}, // methods
+		}) // Vue.createApp
+		myvue.use(Vuetify.createVuetify()).mount('#app')
+	</script>
+
+	<style>
+		.v-btn {
+			text-transform: none;
+		}
+		.aic {align-items: center;}
+		.asc {align-self: center;}
+	
+		table.json-table {
+			border-spacing: 0;
+		}
+	
+		table.json-table tr:not(:last-of-type) td {
+			border-bottom: 1px solid #ccc;
+		}
+	
+		table.json-table td:not(:first-of-type) {
+			border-left: 1px solid #ccc;
+		}
+	</style>
+
+</body>
+</html>
