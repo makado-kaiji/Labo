@@ -108,12 +108,12 @@
 			<input v-model.number="hoyoTime.hour" type="number" inputmode="tel" max="999" min="0">時間
 			<input v-model.number="hoyoTime.min" type="number" inputmode="tel" max="999" min="0">分
 			<button @click="calcHoyoTime">変換</button>
-			<div v-if="hoyoTime.result">　　　　　→ {{hoyoTime.result}}</div>
+			<!-- <div v-if="hoyoTime.result">　　　　　→ {{hoyoTime.result}}</div> -->
 		</div>
 
 		<!-- 今からMAX -->
 		<div>
-			今：<input v-model.number="nowMax" type="number" inputmode="tel" max="999" min="0" @keypress="keypressNow2Max"> / {{patternMax}}
+			今からMAX：<input v-model.number="nowMax" type="number" inputmode="tel" max="999" min="0" @keypress="keypressNow2Max"> / {{patternMax}}
 			<button @click="numTargetValue = patternMax - nowMax; calcFromKaihukuryo()">変換</button>
 		</div>
 		<p style="font-size: x-small;">※Enterキーでも実行できます</p>
@@ -760,7 +760,8 @@
 				/** 現在の計算結果をメモに出力 */
 				outputCopy () {
 					// メモに既存入力があれば改行を付与した上で追加
-					this.memo = (this.memo || '') + (this.memo && this.memo.length > 0 ? '\n' : '') + this.copyDispTimer;
+					this.memo = this.copyDispTimer + (this.memo && this.memo.length > 0 ? '\n' : '') + (this.memo || '') //先頭追加
+					// this.memo = (this.memo || '') + (this.memo && this.memo.length > 0 ? '\n' : '') + this.copyDispTimer; //末尾追加
 				},
 
 				/** タイマースタート/ストップ */
@@ -852,8 +853,11 @@
 					let res = new Date(now.getTime())
 					let addMin = (this.hoyoTime.day * 24 * 60) + (this.hoyoTime.hour * 60) + this.hoyoTime.min
 					res.setMinutes(res.getMinutes() + addMin)
-					this.hoyoTime.result = res.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday: 'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})
-					this.totalD = JSON.parse(JSON.stringify(this.hoyoTime.result)) // deep copy
+					this.hoyoTime.result = res.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit'}) // ,second:'2-digit'
+
+					this.copyDispTimer = JSON.parse(JSON.stringify(this.hoyoTime.result)) // deep copy
+					this.copyDispTimer += ` ほよば式 by${new Date(Date.now()).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}`
+					this.outputCopy()
 				},//calcHoyoTime
 
 				clearHoyoItem(){
