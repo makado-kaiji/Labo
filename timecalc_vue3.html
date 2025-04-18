@@ -24,23 +24,37 @@
 				<v-container max-width="800">
 
 					<v-row dense>
-						<v-col class="pb-3">{{'2025/04/18(金) 15:07:00'}}</v-col>
+						<v-col class="pb-3">{{nowDateTime}}</v-col>
 					</v-row>
 
-					<!-- 回復種別 -->
 					<v-row dense>
 						<v-col :cols="isXs?12:6">
-							<v-select density="compact" variant="outlined" hide-details>
+							<v-select v-model="input.timePattern" :items="selectTimePattern" density="compact" variant="outlined" hide-details>
 								<template v-slot:prepend>回復種別</template>
 							</v-select>
 						</v-col>
 						<v-col :cols="isXs?12:6">
-							<v-select density="compact" variant="outlined" hide-details>
+							<!-- @update:model-value -->
+							<v-select v-model="input.timeMode" :items="selectTimeMode" density="compact" variant="outlined" hide-details @update:model-value="changeTimeMode">
 								<template v-if="isXs" v-slot:prepend>　　　　</template>
 							</v-select>
+							<!-- これはいける <select name="" id="" @change="changeTimeMode($event)">
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+							</select> -->
 						</v-col>
 					</v-row>
 					
+					<v-row dense class="aic">
+						<v-col cols="auto" class="pr-3">回復基準</v-col>
+						<v-col cols="auto">
+							<v-text-field v-model.number="input.numBaseTime" inputmode="tel" width="4rem" density="compact" variant="outlined" hide-details max="99">
+							</v-text-field>
+						</v-col>
+						<v-col>分／1回復</v-col>
+					</v-row>
+
 					<v-row dense>
 						<v-col>
 							<v-text-field type="tel" density="compact" variant="outlined" hide-details>
@@ -158,14 +172,53 @@
 			setup() {
 			},//setup
 			computed: {
-				TODO2 () {
-					let res = ''
-					try {} catch (e) { console.error(e) }
-					return res
-				}, // TODO2
 				isXs(){
 					return this.$vuetify.display.name=='xs'
 				},
+				selectTimePattern(){
+					let res = []
+					try {
+						for (let i = 0; i < this.timePattern.length; i++) {
+							res.push({
+								title:this.timePattern[i].name,
+								value:i,
+							})
+						}
+					} catch (e) {
+						console.error(e)
+						res = null
+					}
+					return res
+				},//selectTimePattern
+
+				selectTimeMode(){
+					let res = []
+					try {
+						if (this.input.timePattern == -1 || this.timePattern.length-1 < this.input.timePattern) return
+						for (let i = 0; i < this.timePattern[this.input.timePattern].mode.length; i++) {
+							res.push({
+								title:this.timePattern[this.input.timePattern].mode[i].name,
+								value:this.timePattern[this.input.timePattern].mode[i].value,
+							})
+						}
+					} catch (e) {
+						console.error(e)
+						res = null
+					}
+					return res
+				},//selectTimeMode
+
+				/*
+				todo(){
+					let res = 
+					try {
+					} catch (e) {
+						console.error(e)
+						res = null
+					}
+					return res
+				},//
+				*/
 			},
 			components: {
 			},
@@ -177,7 +230,190 @@
 					cl: {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3},
 					lm:'',
 					URL:{},
-					input:{},
+					input:{
+						timePattern:0,
+						timeMode:null,
+						numBaseTime:null,
+					},
+
+					nowDateTime:null, // 現在時刻
+
+					timePattern:[
+						{
+							name: '原神 樹脂',
+							value: 8,
+							mode: [
+								{
+									name: '秘境',
+									value: 20,
+								},
+								{
+									name: '週ボス',
+									value: 30,
+								},
+								{
+									name: 'フィールドボス',
+									value: 40,
+								},
+								{
+									name: '週ボス(4~)',
+									value: 60,
+								},
+								{
+									name: 'MAX',
+									value: 200,
+								},
+								/* ~ver4.6
+								{
+									name: 'MAX',
+									value: 160,
+								},
+								*/
+							],
+						},
+						{
+							name: 'スタレ 開拓力',
+							value: 6,
+							mode: [
+								{
+									name: '疑似花萼',
+									value: 10,
+								},
+								{
+									name: '歴戦余韻',
+									value: 30,
+								},
+								{
+									name: 'MAX',
+									value: 300, // ver3.0
+								},
+							],
+						},
+						{
+							name: 'ゼンゼロ バッテリー',
+							value: 6,
+							mode: [
+								{
+									name: '模擬実践',
+									value: 20,
+								},
+								{
+									name: 'エキスパート挑戦',
+									value: 40,
+								},
+								{
+									name: '定期掃討',
+									value: 60,
+								},
+								{
+									name: 'MAX',
+									value: 240,
+								},
+							],
+						},
+						{
+							name: 'デレステ',
+							value: 5,
+							mode: [
+								{
+									name: 'MASTER',
+									value: 15,
+								},
+								{
+									name: 'PRO',
+									value: 12,
+								},
+							],
+						},
+						{
+							name: 'デレステ(営業)',
+							value: 15,
+							mode: [
+								{
+									name: '10H',
+									value: 40,
+								},
+								{
+									name: '6H',
+									value: 24,
+								},
+							],
+						},
+						{
+							name: 'ウマ娘(育成TP)',
+							value: 10,
+							mode: [
+								{
+									name: '1回',
+									value: 30,
+								},
+								{
+									name: 'MAX',
+									value: 100,
+								},
+							],
+						},
+						{
+							name: 'ウマ娘(レースRP)',
+							value: 120,
+							mode: [
+								{
+									name: '1回',
+									value: 1,
+								},
+								{
+									name: 'MAX',
+									value: 5,
+								},
+							],
+						},
+						{
+							name: '刀剣',
+							value: 1,
+							mode: [
+								{
+									name: '遠征',
+									value: 1,
+								},
+								{
+									name: '内番',
+									value: 1,
+								},
+							],
+						},
+						{
+							name: 'ツイステ',
+							value: 15,
+							mode: [
+								{
+									name: 'MAX',
+									value: 10,
+								},
+							],
+						},
+						{
+							name: 'ツイステMS',
+							value: 1,
+							mode: [
+								{
+									name: '20min',
+									value: 20,
+								},
+								{
+									name: '60min',
+									value: 60,
+								},
+								{
+									name: '150min',
+									value: 150,
+								},
+								{
+									name: '360min',
+									value: 360,
+								},
+							],
+						},
+					],//timePattern
 				}
 			}, // data
 			mounted() {
@@ -189,13 +425,68 @@
 					query: Object.fromEntries(url.searchParams),
 					BASE: url.origin + '/',
 				}
+
+				// 現在時刻を表示し続ける
+				this.dispNowDateTime()
+				setInterval(() => this.dispNowDateTime(), 1000);
+
 				this.loading = false
 				console.log(`${new Date().toLocaleString('ja-JP',this.cl)} [mounted] end`)
 			}, // mounted
 			methods: {
+				/** 現在時刻表示 */
+				dispNowDateTime () {
+					this.nowDateTime = this.FormatDate(new Date(Date.now()), '/', true, true, true)
+				},
+
+				// --------------------------------------------------
+				// change
+				// --------------------------------------------------
+				changeTimeMode(e){
+					this.input.numBaseTime = this.input.timeMode
+				},//changeTimeMode
+
 				// --------------------------------------------------
 				// common
 				// --------------------------------------------------
+				/** 日付変換
+				* Date型を受け取った場合はその値で、
+				* 受け取らなかったら呼び出された時点の日時を
+				* [YYYY/MM/DD(d) HH:mm:ss]形式で返却する。
+				*
+				* @module mixins/common/FormatDate
+				* @param {Date} [d=now] 変換したい日付
+				* @param {String} [f='/'] 日付の区切り文字
+				* @param {Boolean} [time = false] 時刻を表示するかどうか(デフォルト非表示false)
+				* @param {Boolean} [day = false] 曜日を表示するかどうか(デフォルト非表示false)
+				* @param {Boolean} [sec = false] 秒を表示するかどうか(デフォルト非表示false)
+				* @param {Boolean} [millsec = false] ミリ秒を表示するかどうか(デフォルト非表示false)
+				* @returns {String} [YYYY/MM/DD(d) HH:mm:ss] 形式文字列
+				*/
+				FormatDate(d = new Date(Date.now()), f = '/', time = false, day = false, sec=false, millsec=false) {
+					let param = {
+						year:'numeric',
+						month:'2-digit',
+						day:'2-digit',
+						hour12:false,
+					}
+					if (time) {
+						param.hour='2-digit'
+						param.minute='2-digit'
+					}
+					if (day) {
+						param.weekday='short'
+					}
+					if (sec) {
+						param.second='2-digit'
+					}
+					if (millsec) {
+						param.fractionalSecondDigits=3
+					}
+					let res = d.toLocaleString('ja-JP',param)
+					if (f != '/') res.split('/').join(f)
+					return res
+				},
 				changeDebugMode () {
 					this.debugCount++
 					console.log(`${new Date().toLocaleString('ja-JP',this.cl)} [changeDebugMode] debugCount = ${this.debugCount}`)
