@@ -57,7 +57,7 @@
 
 					<v-row dense>
 						<v-col>
-							<v-text-field type="tel" density="compact" variant="outlined" hide-details>
+							<v-text-field v-model.number="input.numTargetValue" type="tel" density="compact" variant="outlined" hide-details @keypress="keypressNumTargetValue">
 								<template v-slot:prepend>回復量　</template>
 								<template v-slot:append>
 									<v-btn size="small">変換</v-btn>
@@ -233,7 +233,10 @@
 					input:{
 						timePattern:0,
 						timeMode:null,
+
+						calcMode:-1, // 1:回復量, 2:所要時間, 3:到達時間, 4:残り時間, 5:今からMAX
 						numBaseTime:null,
+						numTargetValue:null,
 					},
 
 					nowDateTime:null, // 現在時刻
@@ -445,6 +448,12 @@
 				changeTimeMode(e){
 					this.input.numBaseTime = this.input.timeMode
 				},//changeTimeMode
+				keypressNumTargetValue(e){
+					if (e.which == 13) {
+						console.log(`[keypressNumTargetValue] enter: ${this.input.numTargetValue}`)
+						this.input.calcMode=1
+					}
+				},//keypressNumTargetValue
 
 				// --------------------------------------------------
 				// common
