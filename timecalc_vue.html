@@ -44,7 +44,7 @@
 			<!-- 種別 -->
 			<select
 				v-model="timePattern.selectIndex"
-				v-on:change="timePatternOnChange"
+				@change="timePatternOnChange"
 			>
 				<option
 					v-for="(timePattern, timePatternIndex) in timePattern.list"
@@ -57,7 +57,7 @@
 			<select
 				v-if="timePattern.selectIndex != null && 0 <= timePattern.selectIndex && timePattern.selectIndex < timePattern.list.length"
 				v-model="timePattern.selectMode"
-				v-on:change="timePatternModeOnChange"
+				@change="timePatternModeOnChange"
 			>
 				<option
 					v-for="(mode, modeIndex) in timePattern.list[timePattern.selectIndex].mode"
@@ -77,18 +77,18 @@
 		<!-- 回復量 -->
 		<div>
 			<span>回復量　：</span>
-			<input type="number" v-model="numTargetValue" inputmode="tel" max="999" min="0" v-on:keypress="numTargetValueOnKeypress" v-on:blur="hankaku2Zenkaku('numTargetValue',$event)">
-			<input type="button" id="btnTargetValue" value="変換" v-on:click="calcFromKaihukuryo">
+			<input type="number" v-model="numTargetValue" inputmode="tel" max="999" min="0" @keypress="numTargetValueOnKeypress" @blur="hankaku2Zenkaku('numTargetValue',$event)">
+			<input type="button" id="btnTargetValue" value="変換" @click="calcFromKaihukuryo">
 		</div>
 
 		<!-- 所要時間 -->
 		<div>
 			<span>所要時間：</span>
-			<input type="number" v-model="numRequiredTimeHour" inputmode="tel" max="999" min="0" v-on:keypress="numRequiredTimeOnKeypress">
+			<input type="number" v-model="numRequiredTimeHour" inputmode="tel" max="999" min="0" @keypress="numRequiredTimeOnKeypress">
 			<span>時間</span>
-			<input type="number" v-model="numRequiredTimeMin" inputmode="tel" max="59" min="0" v-on:keypress="numRequiredTimeOnKeypress">
+			<input type="number" v-model="numRequiredTimeMin" inputmode="tel" max="59" min="0" @keypress="numRequiredTimeOnKeypress">
 			<span>分</span>
-			<input type="button" id="btnRequiredTime" value="変換" v-on:click="calcFromSyoyoJikan">
+			<input type="button" id="btnRequiredTime" value="変換" @click="calcFromSyoyoJikan">
 		</div>
 		
 		<!-- 到達時刻 -->
@@ -98,7 +98,7 @@
 			<span>時</span>
 			<input type="number" v-model="numTargetTimeMin" inputmode="tel" max="59" min="0" v-on:keypress="numTargetTimeOnKeypress">
 			<span>分</span>
-			<input type="button" id="btnTargetTime" value="変換" v-on:click="calcFromToutatuJikoku">
+			<input type="button" id="btnTargetTime" value="変換" @click="calcFromToutatuJikoku">
 		</div>
 
 		<!-- ほよば式「あとX日Y時間」 -->
@@ -113,26 +113,25 @@
 
 		<!-- 今からMAX -->
 		<div>
-			今：<input v-model.number="nowMax" type="number" inputmode="tel" max="999" min="0"> / {{patternMax}}
+			今：<input v-model.number="nowMax" type="number" inputmode="tel" max="999" min="0" @keypress="keypressNow2Max"> / {{patternMax}}
 			<button @click="numTargetValue = patternMax - nowMax; calcFromKaihukuryo()">変換</button>
 		</div>
-
 		<p style="font-size: x-small;">※Enterキーでも実行できます</p>
 
 		<!-- 結果表示・タイマーボタン -->
 		<div>
-			<input type="button" v-on:click="btnStartTimer" :value="timerButton">
+			<input type="button" @click="btnStartTimer" :value="timerButton">
 			<span>{{timerResult}}</span>
 		</div>
 
 		<!-- メモ・出力 -->
 		<div>
 			<p style="font-size: x-small;"></p>
-			<!-- <button v-on:click="outputCopy">↓出力</button> -->
+			<!-- <button @click="outputCopy">↓出力</button> -->
 			<br>
 			<textarea v-model="memo" style="width: calc(100% - 10px);" rows="5" placeholder="メモ用"></textarea>
 			<br>
-			<button v-on:click="shareTweet">tweet</button>
+			<button @click="shareTweet">tweet</button>
 		</div>
 
 		<!-- 電卓 -->
@@ -143,34 +142,34 @@
 						<td colspan="4" class="result">{{ calc }}</td>
 					</tr>
 					<tr>
-						<td><input type="button" value="C" v-on:click="calc = '0'"></td>
+						<td><input type="button" value="C" @click="calc = '0'"></td>
 						<td>&nbsp;</td>
 						<td>&nbsp;</td>
-						<td><input type="button" value="/" v-on:click="calcInput"></td>
+						<td><input type="button" value="/" @click="calcInput"></td>
 					</tr>
 					<tr>
-						<td><input type="button" value="7" v-on:click="calcInput"></td>
-						<td><input type="button" value="8" v-on:click="calcInput"></td>
-						<td><input type="button" value="9" v-on:click="calcInput"></td>
-						<td><input type="button" value="*" v-on:click="calcInput"></td>
+						<td><input type="button" value="7" @click="calcInput"></td>
+						<td><input type="button" value="8" @click="calcInput"></td>
+						<td><input type="button" value="9" @click="calcInput"></td>
+						<td><input type="button" value="*" @click="calcInput"></td>
 					</tr>
 					<tr>
-						<td><input type="button" value="4" v-on:click="calcInput"></td>
-						<td><input type="button" value="5" v-on:click="calcInput"></td>
-						<td><input type="button" value="6" v-on:click="calcInput"></td>
-						<td><input type="button" value="-" v-on:click="calcInput"></td>
+						<td><input type="button" value="4" @click="calcInput"></td>
+						<td><input type="button" value="5" @click="calcInput"></td>
+						<td><input type="button" value="6" @click="calcInput"></td>
+						<td><input type="button" value="-" @click="calcInput"></td>
 					</tr>
 					<tr>
-						<td><input type="button" value="1" v-on:click="calcInput"></td>
-						<td><input type="button" value="2" v-on:click="calcInput"></td>
-						<td><input type="button" value="3" v-on:click="calcInput"></td>
-						<td><input type="button" value="+" v-on:click="calcInput"></td>
+						<td><input type="button" value="1" @click="calcInput"></td>
+						<td><input type="button" value="2" @click="calcInput"></td>
+						<td><input type="button" value="3" @click="calcInput"></td>
+						<td><input type="button" value="+" @click="calcInput"></td>
 					</tr>
 					<tr>
-						<td><input type="button" value="0" v-on:click="calcInput"></td>
+						<td><input type="button" value="0" @click="calcInput"></td>
 						<td>&nbsp;</td>
-						<td><input type="button" value="." v-on:click="calcInput"></td>
-						<td><input type="button" value="=" v-on:click="calcExec"></td>
+						<td><input type="button" value="." @click="calcInput"></td>
+						<td><input type="button" value="=" @click="calcExec"></td>
 					</tr>
 				</tbody>
 			</table>
@@ -548,6 +547,8 @@
 				},
 
 				nowMax:0, // 今からMAX
+
+				totalD:'', // 最終到達日時
 			},
 			mounted() {
 				// 現在時刻を表示し続ける
@@ -624,6 +625,13 @@
 						this.calcFromSyoyoJikan();
 					}
 				},
+
+				keypressNow2Max(e){
+					if (e.which != 13) return
+					this.numTargetValue = this.patternMax - this.nowMax;
+					this.calcFromKaihukuryo()
+				},//keypressNow2Max
+
 				
 				/** 所要時間から変換 */
 				calcFromSyoyoJikan() {
@@ -683,13 +691,13 @@
 				 * @param {object} e イベントオブジェクト（入力値を取る）
 				 */
 				hankaku2Zenkaku(key, e) {
-					console.log(`[hankaku2Zenkaku] key = ${key}`)
-					console.log(e)
-					console.log(e.target.value)
+					// console.log(`[hankaku2Zenkaku] key = ${key}`)
+					// console.log(e)
+					// console.log(e.target.value)
 					const ret = e.target.value.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (s) {
 						return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
 					})
-					console.log(`ret = ${ret}`)
+					// console.log(`ret = ${ret}`)
 					// return ret
 				},
 
@@ -720,12 +728,18 @@
 					// 計算結果を表示した際、ここで「種別、回復量、到達時刻」をコピー出力？できる値を作っておく
 					let d = new Date(Date.now());
 
+					let totalDt = new Date(Date.now());
+					totalDt.setSeconds(totalDt.getSeconds() + (hour * 60 * 60) + (min * 60) +sec)
+					//到達時刻モードだと秒ズレで-1分されたりするので一旦日付のみ採用とする＠2025/04/18
+					this.totalD = totalDt.toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'}) //,hour:'2-digit',minute:'2-digit',second:'2-digit'})
+					// console.log(`[dispTimer] totalD=${this.totalD}`);
+
 					// 刀剣モード：回復量は表示しない & nameではなくmodeで表示
 					if (this.timePattern.list[this.timePattern.selectIndex].name == '刀剣') {
-						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+						this.copyDispTimer = `${this.totalD} ${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
 					} else {
-						this.copyDispTimer = `${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} ${this.numTargetValue}回復 by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+						this.copyDispTimer = `${this.totalD} ${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} ${this.numTargetValue}回復 by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
 						// 原神モード：探索派遣-25%を追加表示
 						if (this.timePattern.list[this.timePattern.selectIndex].name.includes('原神')) {
@@ -832,13 +846,14 @@
 
 				//ほよば式表記の計算
 				calcHoyoTime(){
-					console.log(`${new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday: 'short',hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3})
-						} [calcHoyoTime] ${this.hoyoTime.day}, ${this.hoyoTime.hour}, ${this.hoyoTime.min}`);
+					// console.log(`${new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday: 'short',hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3})
+					// 	} [calcHoyoTime] ${this.hoyoTime.day}, ${this.hoyoTime.hour}, ${this.hoyoTime.min}`);
 					const now = new Date(Date.now())
 					let res = new Date(now.getTime())
 					let addMin = (this.hoyoTime.day * 24 * 60) + (this.hoyoTime.hour * 60) + this.hoyoTime.min
 					res.setMinutes(res.getMinutes() + addMin)
-					this.hoyoTime.result = res.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday: 'short',hour:'2-digit',minute:'2-digit'})
+					this.hoyoTime.result = res.toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',weekday: 'short',hour:'2-digit',minute:'2-digit',second:'2-digit'})
+					this.totalD = JSON.parse(JSON.stringify(this.hoyoTime.result)) // deep copy
 				},//calcHoyoTime
 
 				clearHoyoItem(){
