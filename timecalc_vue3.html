@@ -29,20 +29,14 @@
 
 					<v-row dense>
 						<v-col :cols="isXs?12:6">
-							<v-select v-model="input.timePattern" :items="selectTimePattern" density="compact" variant="outlined" hide-details>
+							<v-select v-model="input.timePattern" :items="selectTimePattern" density="compact" variant="outlined" hide-details @update:model-value="changeTimePattern">
 								<template v-slot:prepend>回復種別</template>
 							</v-select>
 						</v-col>
 						<v-col :cols="isXs?12:6">
-							<!-- @update:model-value -->
 							<v-select v-model="input.timeMode" :items="selectTimeMode" density="compact" variant="outlined" hide-details @update:model-value="changeTimeMode">
 								<template v-if="isXs" v-slot:prepend>　　　　</template>
 							</v-select>
-							<!-- これはいける <select name="" id="" @change="changeTimeMode($event)">
-								<option value="1">1</option>
-								<option value="2">2</option>
-								<option value="3">3</option>
-							</select> -->
 						</v-col>
 					</v-row>
 					
@@ -57,10 +51,10 @@
 
 					<v-row dense>
 						<v-col>
-							<v-text-field v-model.number="input.numTargetValue" type="tel" density="compact" variant="outlined" hide-details @keypress="keypressNumTargetValue">
+							<v-text-field v-model.number="input.numTargetValue" @keypress="keypressCalc($event,1)" type="tel" density="compact" variant="outlined" hide-details>
 								<template v-slot:prepend>回復量　</template>
 								<template v-slot:append>
-									<v-btn size="small">変換</v-btn>
+									<v-btn size="small" @click="clickCalc($event,1)">変換</v-btn>
 								</template>
 							</v-text-field>
 						</v-col>
@@ -69,14 +63,14 @@
 
 					<v-row dense>
 						<v-col>
-							<v-text-field inputmode="tel" label="時間" density="compact" variant="outlined" hide-details max="99">
+							<v-text-field v-model.number="input.numRequiredTimeHour" inputmode="tel" label="時間" @keypress="keypressCalc($event,2)" density="compact" variant="outlined" hide-details max="99">
 								<template v-slot:prepend>所要時間</template>
 							</v-text-field>
 						</v-col>
 						<v-col>
-							<v-text-field inputmode="tel" label="分" density="compact" variant="outlined" hide-details max="99">
+							<v-text-field v-model.number="input.numRequiredTimeMin" inputmode="tel" label="分" @keypress="keypressCalc($event,2)" density="compact" variant="outlined" hide-details max="99">
 								<template v-slot:append>
-									<v-btn size="small">変換</v-btn>
+									<v-btn size="small" @click="clickCalc($event,2)">変換</v-btn>
 								</template>
 							</v-text-field>
 						</v-col>
@@ -85,14 +79,14 @@
 
 					<v-row dense>
 						<v-col>
-							<v-text-field inputmode="tel" label="時間" density="compact" variant="outlined" hide-details max="99">
-								<template v-slot:prepend>到達時間</template>
+							<v-text-field v-model.number="input.numTargetTimeHour" inputmode="tel" label="時間" @keypress="keypressCalc($event,3)" density="compact" variant="outlined" hide-details max="99">
+								<template v-slot:prepend>到達時刻</template>
 							</v-text-field>
 						</v-col>
 						<v-col>
-							<v-text-field inputmode="tel" label="分" density="compact" variant="outlined" hide-details max="99">
+							<v-text-field v-model.number="input.numTargetTimeMin" inputmode="tel" label="分" @keypress="keypressCalc($event,3)" density="compact" variant="outlined" hide-details max="99">
 								<template v-slot:append>
-									<v-btn size="small">変換</v-btn>
+									<v-btn size="small" @click="clickCalc($event,3)">変換</v-btn>
 								</template>
 							</v-text-field>
 						</v-col>
@@ -102,19 +96,19 @@
 					<v-row dense class="aic">
 						<v-col cols="auto" class="pr-3">残り時間</v-col>
 						<v-col cols="auto">
-							<v-text-field inputmode="tel" width="3.7rem" label="日" density="compact" variant="outlined" hide-details max="99">
+							<v-text-field v-model.number="input.hoyoTimeDay" inputmode="tel" width="3.7rem" label="日" @keypress="keypressCalc($event,4)" density="compact" variant="outlined" hide-details max="99">
 							</v-text-field>
 						</v-col>
 						<v-col cols="auto">
-							<v-text-field inputmode="tel" width="3.7rem" label="時" density="compact" variant="outlined" hide-details max="99">
+							<v-text-field v-model.number="input.hoyoTimeHour" inputmode="tel" width="3.7rem" label="時" @keypress="keypressCalc($event,4)" density="compact" variant="outlined" hide-details max="99">
 							</v-text-field>
 						</v-col>
 						<v-col cols="auto">
-							<v-text-field inputmode="tel" width="3.7rem" label="分" density="compact" variant="outlined" hide-details max="99">
+							<v-text-field v-model.number="input.hoyoTimeMin" inputmode="tel" width="3.7rem" label="分" @keypress="keypressCalc($event,4)" density="compact" variant="outlined" hide-details max="99">
 							</v-text-field>
 						</v-col>
 						<v-col cols="auto" class="pl-3">
-							<v-btn size="small">変換</v-btn>
+							<v-btn size="small" @click="clickCalc($event,4)">変換</v-btn>
 						</v-col>
 						<v-col v-if="!isXs"></v-col>
 					</v-row>
@@ -122,16 +116,20 @@
 					<v-row dense class="aic">
 						<v-col cols="auto">今からMAX</v-col>
 						<v-col cols="auto">
-							<v-text-field inputmode="tel" width="4rem" density="compact" variant="outlined" hide-details max="99">
+							<v-text-field v-model.number="input.nowMax" inputmode="tel" @keypress="keypressCalc($event,5)" width="4rem" density="compact" variant="outlined" hide-details max="99">
 							</v-text-field>
 						</v-col>
 						<v-col cols="auto">
-							/ {{200}}
+							/ {{-1 < maxIndex ? timePattern[input.timePattern].mode[maxIndex].value : -1}}
 						</v-col>
 						<v-col cols="auto" class="pl-3">
-							<v-btn size="small">変換</v-btn>
+							<v-btn size="small" @click="clickCalc($event,5)">変換</v-btn>
 						</v-col>
 						<v-col v-if="!isXs"></v-col>
+					</v-row>
+
+					<v-row v-if="goalTime">
+						<v-col>result: {{FormatDate(goalTime,'/',true,true,true)}}</v-col>
 					</v-row>
 
 					<div style="text-align: right;">
@@ -198,7 +196,7 @@
 						for (let i = 0; i < this.timePattern[this.input.timePattern].mode.length; i++) {
 							res.push({
 								title:this.timePattern[this.input.timePattern].mode[i].name,
-								value:this.timePattern[this.input.timePattern].mode[i].value,
+								value:i,
 							})
 						}
 					} catch (e) {
@@ -207,6 +205,18 @@
 					}
 					return res
 				},//selectTimeMode
+				//今選んでいる回復種別のMAX値index
+				maxIndex(){
+					let res = -1
+					try {
+						if (this.input.timePattern < 0 || this.timePattern.length <= this.input.timePattern) return -1
+						res = this.timePattern[this.input.timePattern].mode.findIndex(x => x.name == 'MAX')
+					} catch (e) {
+						console.error(e)
+						res = -1
+					}
+					return res
+				},//maxIndex
 
 				/*
 				todo(){
@@ -233,11 +243,24 @@
 					input:{
 						timePattern:0,
 						timeMode:null,
+						calcMode:-1, // 1:回復量, 2:所要時間, 3:到達時刻, 4:残り時間, 5:今からMAX
+						numBaseTime:8, // 回復基準(分)
 
-						calcMode:-1, // 1:回復量, 2:所要時間, 3:到達時間, 4:残り時間, 5:今からMAX
-						numBaseTime:null,
-						numTargetValue:null,
+						numTargetValue:null, // 回復量
+
+						numRequiredTimeHour:null, // 所要時間(時)
+						numRequiredTimeMin:null, // 所要時間(分)
+
+						numTargetTimeHour:null,//到達時刻(時)
+						numTargetTimeMin:null,//到達時刻(分)
+
+						hoyoTimeDay:null,//ほよば式残り時間(日)
+						hoyoTimeHour:null,//ほよば式残り時間(時)
+						hoyoTimeMin:null,//ほよば式残り時間(分)
+
+						nowMax:null,//今からMAX
 					},
+					goalTime:null,//計算結果到達時刻(最終リザルト)
 
 					nowDateTime:null, // 現在時刻
 
@@ -442,22 +465,77 @@
 					this.nowDateTime = this.FormatDate(new Date(Date.now()), '/', true, true, true)
 				},
 
+				// calcMode 1:回復量, 2:所要時間, 3:到達時刻, 4:残り時間, 5:今からMAX
+				calcTime(){
+					//基準現在
+					const now = new Date(Date.now())
+					//到達時刻
+					this.goalTime = new Date(now.getTime())
+					debugger
+
+					//所要時間
+					if (this.input.calcMode == 2){
+						this.input.numTargetValue = Math.floor((this.input.numRequiredTimeHour * 60 + this.input.numRequiredTimeMin) / this.input.numBaseTime)
+						this.goalTime.setHours(this.goalTime.getHours()+this.input.numRequiredTimeHour)
+						this.goalTime.setMinutes(this.goalTime.getMinutes()+this.input.numRequiredTimeMin)
+					}
+					//到達時刻
+					else if (this.input.calcMode == 3){
+						this.goalTime = new Date(this.goalTime.getFullYear(),this.goalTime.getMonth(),this.goalTime.getDate(),this.input.numTargetTimeHour,this.input.numTargetTimeMin,this.goalTime.getMinutes())
+						if (this.goalTime.getTime() < now.getTime()){
+							this.goalTime.setDate(this.goalTime.getDate()+1) //日付超え
+						}
+						const distanceMillSec = this.goalTime.getTime() - now.getTime()
+						this.input.numTargetValue = Math.floor((distanceMillSec/1000/60) / this.input.numBaseTime)
+					}
+					//残り時間
+					else if (this.input.calcMode == 4){
+						this.goalTime.setDate(this.goalTime.getDate()+this.input.hoyoTimeDay)
+						this.goalTime.setHours(this.goalTime.getHours()+this.input.hoyoTimeHour)
+						this.goalTime.setMinutes(this.goalTime.getMinutes()+this.input.hoyoTimeMin)
+					}
+					//今からMAX: MAX - 現在値
+					else if (this.input.calcMode == 5){
+						if (-1 < this.maxIndex) {
+							this.input.numTargetValue = this.timePattern[this.input.timePattern].mode[this.maxIndex].value - this.input.nowMax
+						}
+					}
+
+					//回復量→到達時刻
+					if ([1,5].includes(this.input.calcMode)){
+						this.goalTime.setMinutes(this.goalTime.getMinutes() + (this.input.numTargetValue * this.input.numBaseTime))
+					}
+
+					console.log(`${this.FormatDate(now,'/',true,true,true,true,true)} -> [${this.input.numTargetValue}]${this.FormatDate(this.goalTime,'/',true,true,true,true,true)}`)
+
+				},//calcTime
+
 				// --------------------------------------------------
 				// change
 				// --------------------------------------------------
+				changeTimePattern(e){
+					this.input.timeMode = null
+					this.input.numBaseTime = this.timePattern[this.input.timePattern].value
+				},//changeTimePattern
 				changeTimeMode(e){
-					this.input.numBaseTime = this.input.timeMode
+					this.input.numTargetValue = this.timePattern[this.input.timePattern].mode[this.input.timeMode].value
 				},//changeTimeMode
-				keypressNumTargetValue(e){
+				keypressCalc(e,index){
 					if (e.which == 13) {
-						console.log(`[keypressNumTargetValue] enter: ${this.input.numTargetValue}`)
-						this.input.calcMode=1
+						console.log(`[keypressCalc] ${index}`)
+						this.input.calcMode=index
+						this.calcTime()
 					}
-				},//keypressNumTargetValue
+				},//keypressCalc
+				clickCalc(e,index){
+					console.log(`[clickCalc] ${index}`)
+					this.input.calcMode=index
+					this.calcTime()
+				},//clickCalc
 
-				// --------------------------------------------------
-				// common
-				// --------------------------------------------------
+				/* --------------------------------------------------
+				common
+				-------------------------------------------------- */
 				/** 日付変換
 				* Date型を受け取った場合はその値で、
 				* 受け取らなかったら呼び出された時点の日時を
