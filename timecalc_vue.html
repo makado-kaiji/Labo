@@ -554,8 +554,8 @@
 				// 現在時刻を表示し続ける
 				setInterval(() => this.dispNowDateTime(), 1000);
 
-				// 選択した回復種別 初期値：原神
-				this.timePattern.selectIndex = 0;
+				// 選択した回復種別 初期値：刀剣
+				this.timePattern.selectIndex = 7;
 				this.timePatternOnChange();
 			},
 			methods: {
@@ -572,8 +572,8 @@
 				* @module mixins/common/FormatDate
 				* @param {Date} [d=now] 変換したい日付
 				* @param {String} [f='/'] 日付の区切り文字
-				* @param {Boolean} [time = true] 時刻を表示するかどうか
-				* @param {Boolean} [day = true] 曜日を表示するかどうか
+				* @param {Boolean} [time = true] 時刻を表示するかどうか(初期値：true(表示する))
+				* @param {Boolean} [day = true] 曜日を表示するかどうか(初期値：true(表示する))
 				* @returns {String} [YYYY/MM/DD(d) HH:mm:ss] 形式文字列
 				*/
 				FormatDate(d = new Date(Date.now()), f = '/', time = true, day = true) {
@@ -736,7 +736,7 @@
 
 					// 刀剣モード：回復量は表示しない & nameではなくmodeで表示
 					if (this.timePattern.list[this.timePattern.selectIndex].name == '刀剣') {
-						this.copyDispTimer = `${this.totalD} ${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+						this.copyDispTimer = `${this.totalD} ${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' '+ this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} by ${this.FormatDate(d,'/',true,true).slice(0,-3)}`;
 
 					} else {
 						this.copyDispTimer = `${this.totalD} ${(this.numTargetTimeHour || '0').toString().padStart(2, '0')}:${(this.numTargetTimeMin || '0').toString().padStart(2, '0')} ${this.timePattern.list[this.timePattern.selectIndex].name}${this.timePattern.selectMode != null ? ' ' + this.timePattern.list[this.timePattern.selectIndex].mode[this.timePattern.selectMode].name : ''} ${this.numTargetValue}回復 by${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
